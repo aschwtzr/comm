@@ -36,9 +36,9 @@ TEST_F(DatabaseManagerTest, PutAndFoundMessageItemsStaticDataIsSame) {
       "iGhpnX7Hp4xpBL3h2IkvGviDRQ98UvW0ugwUuPxm1NOQpjLG5dPoqQ0jrMst0Bl5rgPw"
       "ajjNGsUWmp9r0ST0wRQXrQcY30PoSoqKSlCEgFMLzHWLrPQ86QFyCICismGSe7iBIqdD"
       "6d37StvXBzfJoZVU79UeOF2bFvb3DNoArEOe",
-      "7s6ZUSDoFfZe3eJWQ15ngYhgMw1TsfbECnMVQTYvY6OyqWPBQi5wiftFcluoxor8",
-      static_cast<uint64_t>(std::time(0)) + 600);
+      "7s6ZUSDoFfZe3eJWQ15ngYhgMw1TsfbECnMVQTYvY6OyqWPBQi5wiftFcluoxor8");
   const size_t currentTimestamp = tools::getCurrentTimestamp();
+  ;
   EXPECT_EQ(
       database::DatabaseManager::getInstance().isTableAvailable(
           item.getTableName()),
@@ -67,8 +67,7 @@ TEST_F(DatabaseManagerTest, PutAndFoundMessageItemsGeneratedDataIsSame) {
       "mobile:" + tools::generateRandomString(DEVICEID_CHAR_LENGTH),
       "web:" + tools::generateRandomString(DEVICEID_CHAR_LENGTH),
       tools::generateRandomString(256),
-      tools::generateRandomString(256),
-      static_cast<uint64_t>(std::time(0)) + 600);
+      tools::generateRandomString(256));
   EXPECT_EQ(
       database::DatabaseManager::getInstance().isTableAvailable(
           item.getTableName()),
@@ -94,10 +93,6 @@ TEST_F(DatabaseManagerTest, PutAndFoundMessageItemsGeneratedDataIsSame) {
       << "Generated BlobHashes \"" << item.getBlobHashes()
       << "\" differs from what is found in the database "
       << foundItem->getBlobHashes();
-  EXPECT_EQ(item.getExpire(), foundItem->getExpire())
-      << "Generated Expire time \"" << item.getExpire()
-      << "\" differs from what is found in the database "
-      << foundItem->getExpire();
   database::DatabaseManager::getInstance().removeMessageItem(
       item.getMessageID());
 }
@@ -277,8 +272,7 @@ TEST_F(DatabaseManagerTest, PutAndFoundByReceiverMessageItemsDataIsSame) {
       "iGhpnX7Hp4xpBL3h2IkvGviDRQ98UvW0ugwUuPxm1NOQpjLG5dPoqQ0jrMst0Bl5rgPw"
       "ajjNGsUWmp9r0ST0wRQXrQcY30PoSoqKSlCEgFMLzHWLrPQ86QFyCICismGSe7iBIqdD"
       "6d37StvXBzfJoZVU79UeOF2bFvb3DNoArEOe",
-      "7s6ZUSDoFfZe3eJWQ15ngYhgMw1TsfbECnMVQTYvY6OyqWPBQi5wiftFcluoxor8",
-      static_cast<uint64_t>(std::time(0)) + 600);
+      "7s6ZUSDoFfZe3eJWQ15ngYhgMw1TsfbECnMVQTYvY6OyqWPBQi5wiftFcluoxor8");
   EXPECT_EQ(
       database::DatabaseManager::getInstance().isTableAvailable(
           item.getTableName()),
