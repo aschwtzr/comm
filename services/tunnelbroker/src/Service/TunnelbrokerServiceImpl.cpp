@@ -155,6 +155,14 @@ grpc::Status TunnelBrokerServiceImpl::Send(
     }
     const std::string clientDeviceID = sessionItem->getDeviceID();
     const std::string messageID = tools::generateUUID();
+
+    const database::MessageItem message(
+        messageID,
+        clientDeviceID,
+        request->todeviceid(),
+        request->payload(),
+        "");
+    database::DatabaseManager::getInstance().putMessageItem(message);
     if (!AmqpManager::getInstance().send(
             messageID,
             clientDeviceID,
@@ -199,6 +207,24 @@ grpc::Status TunnelBrokerServiceImpl::Get(
     }
     const std::string clientDeviceID = sessionItem->getDeviceID();
     DeliveryBrokerMessage messageToDeliver;
+
+    std::vector<std::shared_ptr<database::MessageItem>> messagesFromDatabase =
+        database::DatabaseManager::getInstance().findMessageItemsByReceiver(
+            clientDeviceID);
+    if (messagesFromDatabase.size() > 0) {
+      DeliveryBroker::getInstance().erase(clientDeviceID);
+    }
+    for (auto &messageFromDatabase : messagesFromDatabase) {
+      tunnelbroker::GetResponse response;
+      response.set_fromdeviceid(messageFromDatabase->getFromDeviceID());
+      response.set_payload(messageFromDatabase->getPayload());
+      if (!writer->Write(response)) {
+        throw std::runtime_error(
+            "gRPC: 'Get' writer error on sending data to the client");
+      }
+      database::DatabaseManager::getInstance().removeMessageItem(
+          messageFromDatabase->getMessageID());
+    }
     while (1) {
       messageToDeliver = DeliveryBroker::getInstance().pop(clientDeviceID);
       tunnelbroker::GetResponse response;
@@ -210,6 +236,8 @@ grpc::Status TunnelBrokerServiceImpl::Get(
       }
       comm::network::AmqpManager::getInstance().ack(
           messageToDeliver.deliveryTag);
+      database::DatabaseManager::getInstance().removeMessageItem(
+          messageToDeliver.messageID);
       if (DeliveryBroker::getInstance().isEmpty(clientDeviceID)) {
         DeliveryBroker::getInstance().erase(clientDeviceID);
       }
