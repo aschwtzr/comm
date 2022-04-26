@@ -145,6 +145,10 @@ const unboundStyles = {
     flex: 0,
     marginHorizontal: 15,
     marginVertical: 20,
+    shadowColor: '#303030',
+    shadowOpacity: 1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 20,
   },
 };
 
