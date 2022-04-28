@@ -72,7 +72,8 @@ export type Icon =
   | 'dino-avatar'
   | 'laptop'
   | 'list-filled'
-  | 'reply-chat-bubble';
+  | 'reply-chat-bubble'
+  | 'user-cross';
 
 type SWMansionIconProps = {
   +icon: Icon,
