@@ -47,8 +47,37 @@ foreach(_component ${_components})
   install(FILES ${PROTO_HDRS} ${GRPC_HDRS} DESTINATION include)
 endforeach()
 
+set(CLIENT_HDRS "Client.h" "ClientGetReadReactor.h" "GRPCStreamHostObject.h")
+set(CLIENT_SRCS "Client.cpp" "ClientGetReadReactor.cpp" "GRPCStreamHostObject.cpp")
+
+add_library(client
+  ${CLIENT_HDRS}
+  ${CLIENT_SRCS}
+)
+
+target_link_libraries(client
+  gRPC::grpc++
+  protobuf::libprotobuf
+  tunnelbroker
+)
+
+# reference local directory when building, use installation path when installing
+target_include_directories(client
+  PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+  $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+install(TARGETS client EXPORT comm-export
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT client
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT client
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT client
+)
+
+install(FILES ${CLIENT_HDRS} DESTINATION include)
+
 # For development purposes, can point cmake to this directory if doing development
-export(TARGETS ${_components}
+export(TARGETS ${_components} client
   NAMESPACE comm-grpc::
   FILE ${CMAKE_CURRENT_BINARY_DIR}/cmake/comm-grpc/comm-grpc-targets.cmake
 )
