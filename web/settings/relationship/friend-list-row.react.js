@@ -13,7 +13,7 @@ import css from './friend-list-row.css';
 import type { UserRowProps } from './user-list.react';
 
 function FriendListRow(props: UserRowProps): React.Node {
-  const { userInfo } = props;
+  const { userInfo, onMenuVisibilityChange } = props;
 
   const { friendUser, unfriendUser } = useRelationshipCallbacks(userInfo.id);
   const buttons = React.useMemo(() => {
@@ -48,6 +48,7 @@ function FriendListRow(props: UserRowProps): React.Node {
       return (
         <div className={css.edit_menu}>
           <Menu
+            onChange={onMenuVisibilityChange}
             icon={<SWMansionIcon icon="edit" size={22} />}
             variant="member-actions"
           >
@@ -62,7 +63,12 @@ function FriendListRow(props: UserRowProps): React.Node {
       );
     }
     return undefined;
-  }, [friendUser, unfriendUser, userInfo.relationshipStatus]);
+  }, [
+    friendUser,
+    unfriendUser,
+    userInfo.relationshipStatus,
+    onMenuVisibilityChange,
+  ]);
 
   return (
     <div className={css.container}>
