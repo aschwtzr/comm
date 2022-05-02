@@ -294,8 +294,13 @@ div.spacer {
   height: 6px;
 }
 
-div.emptyItem {
-  padding: 10px;
+div.emptyItemContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+div.emptyItemText {
+  padding: 16px;
   font-size: 16px;
   text-align: center;
   white-space: pre-wrap;
