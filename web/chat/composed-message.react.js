@@ -164,7 +164,7 @@ class ComposedMessage extends React.PureComponent<Props> {
         <div className={css.sidebarMarginBottom}>
           <InlineSidebar
             threadInfo={item.threadCreatedFromMessage}
-            positioning={positioning}
+            position={positioning}
           />
         </div>
       );
