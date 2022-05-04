@@ -30,6 +30,7 @@ file(GLOB_RECURSE SOURCE_CODE "./src/*.cpp")
 include_directories(
   ./lib_src
   ./lib_src/server-base-reactors
+  ./lib_src/client-base-reactors
   ./src
   ./src/grpc-client
   ./src/DatabaseEntities
