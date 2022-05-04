@@ -29,6 +29,7 @@ file(GLOB GENERATED_CODE "./_generated/*.cc")
 file(GLOB SOURCE_CODE "./src/*.cpp" "./src/**/*.cpp")
 
 include_directories(
+  ./lib_src
   ./src
   ./src/DatabaseEntities
   ./src/Reactors/
