@@ -15,6 +15,7 @@
   "parser": "babel-eslint",
   "plugins": ["react", "react-hooks", "flowtype", "monorepo", "import"],
   "rules": {
+    "prettier/prettier": ["error", { "printWidth": 80 }],
     "flowtype/require-valid-file-annotation": ["error", "always"],
     "flowtype/require-exact-type": ["error", "never"],
     "curly": "error",
