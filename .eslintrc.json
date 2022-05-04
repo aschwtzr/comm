@@ -15,6 +15,10 @@
   "parser": "babel-eslint",
   "plugins": ["react", "react-hooks", "flowtype", "monorepo", "import"],
   "rules": {
+    // hack: https://eslint.org/docs/rules/max-len code defaults to 80
+    // when we want to turn it off. Set code to 420 to effectively turn off
+    "max-len": ["error", { "code": 420, "comments": 80, "ignoreUrls": true }],
+    "prettier/prettier": ["error", { "printWidth": 80 }],
     "flowtype/require-valid-file-annotation": ["error", "always"],
     "flowtype/require-exact-type": ["error", "never"],
     "curly": "error",
