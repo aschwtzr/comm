@@ -15,6 +15,12 @@
   "parser": "babel-eslint",
   "plugins": ["react", "react-hooks", "flowtype", "monorepo", "import"],
   "rules": {
+    // hack: https://eslint.org/docs/rules/max-len
+    // The default max-len rule for `code` is 80 characters
+    // which breaks import statement formatting.
+    // Setting `code` to 420 characters lets us get around this issue.
+    // Prettier handles limiting line length to 80 by default.
+    "max-len": ["error", { "code": 420, "comments": 80, "ignoreUrls": true }],
     "flowtype/require-valid-file-annotation": ["error", "always"],
     "flowtype/require-exact-type": ["error", "never"],
     "curly": "error",
