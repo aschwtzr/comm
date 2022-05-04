@@ -28,6 +28,7 @@ file(GLOB GENERATED_CODE "./_generated/*.cc")
 file(GLOB_RECURSE SOURCE_CODE "./src/*.cpp")
 
 include_directories(
+  ./lib_src
   ./src
   ./src/grpc-client
   ./src/DatabaseEntities
