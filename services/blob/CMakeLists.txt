@@ -30,6 +30,7 @@ file(GLOB SOURCE_CODE "./src/*.cpp" "./src/**/*.cpp")
 
 include_directories(
   ./lib_src
+  ./lib_src/server-base-reactors
   ./src
   ./src/DatabaseEntities
   ./src/Reactors/
