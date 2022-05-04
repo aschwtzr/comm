@@ -18,7 +18,9 @@ impl Config {
   }
 }
 
-#[derive(Debug, derive_more::Display, derive_more::From, derive_more::Error)]
+#[derive(
+  Debug, derive_more::Display, derive_more::From, derive_more::Error,
+)]
 pub enum Error {
   #[display(...)]
   Pake(PakeError),
