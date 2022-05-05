@@ -1,8 +1,4 @@
 div.modal_body {
-  padding: 20px;
-  background-color: var(--modal-bg);
-  border-radius: 16px;
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
