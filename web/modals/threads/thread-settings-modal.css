@@ -1,8 +1,4 @@
 div.modal_body {
-  padding: 20px;
-  background-color: var(--modal-bg);
-  border-radius: 16px;
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -10,6 +6,9 @@ div.modal_body p {
   padding: 1px 3px 4px 3px;
   font-size: 14px;
   text-align: center;
+}
+div.tab_body {
+  padding: 20px;
 }
 div.modal_form_error {
   display: flex;
