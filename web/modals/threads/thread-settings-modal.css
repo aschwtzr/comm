@@ -20,23 +20,6 @@ div.modal_form_error {
   font-style: italic;
 }
 
-ul.tab_panel {
-  background-color: var(--modal-bg);
-  padding-left: 10px;
-  padding-top: 5px;
-}
-ul.tab_panel > li {
-  display: inline-block;
-  list-style-type: none;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 3px 10px 3px 10px;
-}
-ul.tab_panel > li > a {
-  color: #555555;
-}
-
 .save_button {
   width: 100%;
 }
