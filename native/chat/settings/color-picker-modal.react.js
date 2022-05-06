@@ -55,7 +55,7 @@ class ColorPickerModal extends React.PureComponent<Props> {
     const { color, threadInfo } = this.props.route.params;
     // Based on the assumption we are always in portrait,
     // and consequently width is the lowest dimensions
-    const modalStyle = { height: this.props.windowWidth - 5 };
+    const modalStyle = { height: this.props.windowWidth - 100 };
     return (
       <Modal modalStyle={[this.props.styles.colorPickerContainer, modalStyle]}>
         <ColorPicker
