@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::ParseError;
 use opaque_ke::{errors::ProtocolError, ServerRegistration};
 use rusoto_core::{Region, RusotoError};
 use rusoto_dynamodb::{
@@ -9,6 +10,7 @@ use rusoto_dynamodb::{
 use tracing::{error, info};
 
 use crate::opaque::Cipher;
+use crate::token::{AccessToken, AuthType};
 
 pub struct DatabaseClient {
   client: DynamoDbClient,
@@ -76,6 +78,109 @@ impl DatabaseClient {
       }
     }
   }
+
+  pub async fn get_token(
+    &self,
+    user_id: String,
+    device_id: String,
+  ) -> Result<Option<AccessToken>, Error> {
+    let primary_key = create_composite_primary_key(
+      ("userID".to_string(), user_id.clone()),
+      ("deviceID".to_string(), device_id.clone()),
+    );
+    let get_item_input = GetItemInput {
+      table_name: "identity-tokens".to_string(),
+      key: primary_key,
+      consistent_read: Some(true),
+      ..GetItemInput::default()
+    };
+    let get_item_result = self.client.get_item(get_item_input).await;
+    match get_item_result {
+      Ok(GetItemOutput {
+        item: Some(item), ..
+      }) => {
+        let created = if let Some(AttributeValue {
+          s: Some(created), ..
+        }) = item.get("created")
+        {
+          created.parse().map_err(|e| {
+            error!("Could not parse DateTime from 'created' attribute {} for user {}'s token for device {}: {}", created, user_id, device_id, e);
+            Error::Chrono(e)
+          })?
+        } else {
+          error!(
+            "'created' attribute missing for user {}'s token for device {}",
+            user_id, device_id
+          );
+          return Err(Error::MissingAttribute);
+        };
+        let auth_type = if let Some(AttributeValue {
+          s: Some(auth_type), ..
+        }) = item.get("authType")
+        {
+          match auth_type.as_str() {
+            "password" => AuthType::Password,
+            "wallet" => AuthType::Wallet,
+            unsupported => {
+              error!("Expected valid AuthType variant for user {}'s token for device {}, found: {}", user_id, device_id, unsupported);
+              return Err(Error::InvalidAuthType);
+            }
+          }
+        } else {
+          error!(
+            "'authType' attribute missing for user {}'s token for device {}",
+            user_id, device_id
+          );
+          return Err(Error::MissingAttribute);
+        };
+        let valid = if let Some(AttributeValue {
+          bool: Some(valid), ..
+        }) = item.get("valid")
+        {
+          *valid
+        } else {
+          error!(
+            "'valid' attribute missing for user {}'s token for device {}",
+            user_id, device_id
+          );
+          return Err(Error::MissingAttribute);
+        };
+        let token = if let Some(AttributeValue { s: Some(token), .. }) =
+          item.get("token")
+        {
+          token.to_string()
+        } else {
+          error!(
+            "'token' attribute missing for user {}'s token for device {}",
+            user_id, device_id
+          );
+          return Err(Error::MissingAttribute);
+        };
+        Ok(Some(AccessToken {
+          user_id: user_id,
+          device_id: device_id,
+          token: token,
+          created: created,
+          auth_type: auth_type,
+          valid: valid,
+        }))
+      }
+      Ok(_) => {
+        info!(
+          "No item found for user {} and device {} in token table",
+          user_id, device_id
+        );
+        Ok(None)
+      }
+      Err(e) => {
+        error!(
+          "DynamoDB client failed to get token for user {} on device {}: {}",
+          user_id, device_id, e
+        );
+        Err(Error::Rusoto(e))
+      }
+    }
+  }
 }
 
 #[derive(
@@ -88,6 +193,10 @@ pub enum Error {
   Pake(ProtocolError),
   #[display(...)]
   MissingAttribute,
+  #[display(...)]
+  Chrono(ParseError),
+  #[display(...)]
+  InvalidAuthType,
 }
 
 type AttributeName = String;
