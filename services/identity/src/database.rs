@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use chrono::{DateTime, Utc};
 use opaque_ke::{errors::ProtocolError, ServerRegistration};
 use rusoto_core::{Region, RusotoError};
 use rusoto_dynamodb::{
@@ -9,6 +10,18 @@ use rusoto_dynamodb::{
 use tracing::{error, info};
 
 use crate::opaque::Cipher;
+
+pub enum AuthType {
+  Password,
+  Wallet,
+}
+
+pub struct Token {
+  pub token: String,
+  pub created: Option<DateTime<Utc>>,
+  pub auth_type: Option<AuthType>,
+  pub valid: Option<bool>,
+}
 
 pub struct DatabaseClient {
   client: DynamoDbClient,
