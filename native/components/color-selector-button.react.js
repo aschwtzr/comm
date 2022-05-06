@@ -6,20 +6,27 @@ import tinycolor from 'tinycolor2';
 
 type ColorSelectorButtonProps = {
   +color: string,
-  +currentColor: string,
+  +pendingColor: string,
+  +setPendingColor: ((string => string) | string) => void,
 };
-
 function ColorSelectorButton(props: ColorSelectorButtonProps): React.Node {
-  const { color, currentColor } = props;
+  const { color, pendingColor, setPendingColor } = props;
 
   const colorSplotchStyle = React.useMemo(() => {
     return [styles.button, { backgroundColor: `#${color}` }];
   }, [color]);
 
-  const isSelected = tinycolor.equals(currentColor, color);
+  const onPendingColorSelected = React.useCallback(() => {
+    setPendingColor(color);
+  }, [setPendingColor, color]);
+
+  const isSelected = tinycolor.equals(pendingColor, color);
   return (
     <View style={isSelected ? styles.outerRingSelected : styles.outerRing}>
-      <TouchableOpacity style={colorSplotchStyle} />
+      <TouchableOpacity
+        style={colorSplotchStyle}
+        onPress={onPendingColorSelected}
+      />
     </View>
   );
 }
