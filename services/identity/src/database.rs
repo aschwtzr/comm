@@ -76,7 +76,7 @@ impl DatabaseClient {
           "DynamoDB client failed to get registration data for user {}: {}",
           user_id, e
         );
-        Err(Error::Rusoto(e))
+        Err(Error::RusotoGet(e))
       }
     }
   }
@@ -208,7 +208,7 @@ impl DatabaseClient {
           "DynamoDB client failed to get token for user {} on device {}: {}",
           user_id, device_id, e
         );
-        Err(Error::Rusoto(e))
+        Err(Error::RusotoGet(e))
       }
     }
   }
@@ -219,7 +219,9 @@ impl DatabaseClient {
 )]
 pub enum Error {
   #[display(...)]
-  Rusoto(RusotoError<GetItemError>),
+  RusotoGet(RusotoError<GetItemError>),
+  #[display(...)]
+  RusotoPut(RusotoError<PutItemError>),
   #[display(...)]
   Pake(ProtocolError),
   #[display(...)]
