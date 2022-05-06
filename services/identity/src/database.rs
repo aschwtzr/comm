@@ -224,6 +224,89 @@ impl DatabaseClient {
       }
     }
   }
+
+  pub async fn put_token(
+    &self,
+    user_id: String,
+    device_id: String,
+    token: Token,
+  ) -> Result<PutItemOutput, Error> {
+    let created_string = if let Some(created) = token.created {
+      created.to_rfc3339()
+    } else {
+      error!("Token corresponding to user {} and device {} is missing the 'created' attribute", user_id, device_id);
+      return Err(Error::MissingAttribute);
+    };
+    let auth_type_string = if let Some(auth_type) = token.auth_type {
+      match auth_type {
+        AuthType::Password => "password".to_string(),
+        AuthType::Wallet => "wallet".to_string(),
+      }
+    } else {
+      error!("Token corresponding to user {} and device {} is missing the 'authType' attribute", user_id, device_id);
+      return Err(Error::MissingAttribute);
+    };
+    let valid_bool = if let Some(valid) = token.valid {
+      valid
+    } else {
+      error!("Token corresponding to user {} and device {} is missing the 'valid' attribute", user_id, device_id);
+      return Err(Error::MissingAttribute);
+    };
+
+    let input = PutItemInput {
+      table_name: "identity-tokens".to_string(),
+      item: HashMap::from([
+        (
+          "userID".to_string(),
+          AttributeValue {
+            s: Some(user_id),
+            ..Default::default()
+          },
+        ),
+        (
+          "deviceID".to_string(),
+          AttributeValue {
+            s: Some(device_id),
+            ..Default::default()
+          },
+        ),
+        (
+          "token".to_string(),
+          AttributeValue {
+            s: Some(token.token),
+            ..Default::default()
+          },
+        ),
+        (
+          "created".to_string(),
+          AttributeValue {
+            s: Some(created_string),
+            ..Default::default()
+          },
+        ),
+        (
+          "authType".to_string(),
+          AttributeValue {
+            s: Some(auth_type_string),
+            ..Default::default()
+          },
+        ),
+        (
+          "valid".to_string(),
+          AttributeValue {
+            bool: Some(valid_bool),
+            ..Default::default()
+          },
+        ),
+      ]),
+      ..PutItemInput::default()
+    };
+    self
+      .client
+      .put_item(input)
+      .await
+      .map_err(|e| Error::RusotoPut(e))
+  }
 }
 
 #[derive(
