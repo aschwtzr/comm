@@ -21,3 +21,5 @@ services/identity/Dockerfile
 .eslintcache
 .vscode
 !.vscode/extensions.json
+services/backup/Dockerfile
+
