@@ -86,3 +86,17 @@ services:
       - localstack:/tmp/localstack
     networks:
       - services-net
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "5671:5671"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=comm
+      - RABBITMQ_DEFAULT_PASS=comm
+    networks:
+      - services-net
