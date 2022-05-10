@@ -72,4 +72,25 @@ Media MessageOperationsUtilities::translateMediaToClientDBMediaInfo(
       std::move(type),
       std::move(extras)};
 }
+
+std::vector<std::pair<Message, std::vector<Media>>>
+MessageOperationsUtilities::translateStringToClientDBMessageInfo(
+    std::string rawMessageInfoString) {
+  folly::dynamic rawMessageInfos =
+      folly::parseJson(folly::trimWhitespace(rawMessageInfoString));
+  if (!rawMessageInfos.isArray()) {
+    throw std::runtime_error(
+        "messageInfos is expected to be an array of JSON objects");
+  }
+  std::vector<std::pair<Message, std::vector<Media>>> clientDBMessageInfos;
+  for (const auto &messageInfo : rawMessageInfos) {
+    if (!messageInfo.isObject()) {
+      throw std::runtime_error(
+          "encountered messageInfos element that is not JSON object");
+    }
+    clientDBMessageInfos.push_back(
+        translateRawMessageInfoToClientDBMessageInfo(messageInfo));
+  }
+  return clientDBMessageInfos;
+}
 } // namespace comm
