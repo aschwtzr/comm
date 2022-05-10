@@ -6,6 +6,50 @@
 #include <stdexcept>
 
 namespace comm {
+std::pair<Message, std::vector<Media>>
+MessageOperationsUtilities::translateRawMessageInfoToClientDBMessageInfo(
+    const folly::dynamic &rawMessageInfo) {
+  std::string id = rawMessageInfo.count("id")
+      ? rawMessageInfo["id"].asString()
+      : rawMessageInfo["localID"].asString();
+  std::string thread = rawMessageInfo["threadID"].asString();
+  std::string user = rawMessageInfo["creatorID"].asString();
+  std::unique_ptr<std::string> localID = rawMessageInfo.count("localID")
+      ? std::make_unique<std::string>(rawMessageInfo["localID"].asString())
+      : nullptr;
+  int type = rawMessageInfo["type"].asInt();
+  MessageType messageType = static_cast<MessageType>(type);
+  int64_t time = rawMessageInfo["time"].asInt();
+  std::unique_ptr<int> futureType = (messageType == MessageType::UNSUPPORTED)
+      ? std::make_unique<int>(
+            rawMessageInfo["unsupportedMessageInfo"]["type"].asInt())
+      : nullptr;
+  std::unique_ptr<std::string> content =
+      messageSpecsHolder.find(messageType) != messageSpecsHolder.end()
+      ? messageSpecsHolder.at(messageType)
+            ->messageContentForClientDB(rawMessageInfo)
+      : nullptr;
+  std::vector<Media> mediaInfos;
+  if (messageType == MessageType::IMAGES ||
+      messageType == MessageType::MULTIMEDIA) {
+    for (const auto &rawMediaInfo : rawMessageInfo["media"]) {
+      mediaInfos.push_back(
+          translateMediaToClientDBMediaInfo(rawMediaInfo, id, thread));
+    }
+  }
+  return {
+      Message{
+          id,
+          std::move(localID),
+          std::move(thread),
+          std::move(user),
+          type,
+          std::move(futureType),
+          std::move(content),
+          time},
+      std::move(mediaInfos)};
+}
+
 Media MessageOperationsUtilities::translateMediaToClientDBMediaInfo(
     const folly::dynamic &rawMediaInfo,
     const std::string &container,
