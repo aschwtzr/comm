@@ -93,4 +93,17 @@ MessageOperationsUtilities::translateStringToClientDBMessageInfo(
   }
   return clientDBMessageInfos;
 }
+
+void MessageOperationsUtilities::storeNotification(
+    std::string rawMessageInfoString) {
+  std::vector<std::pair<Message, std::vector<Media>>> clientDBMessageInfos =
+      translateStringToClientDBMessageInfo(rawMessageInfoString);
+  for (const auto &clientDBMessageInfo : clientDBMessageInfos) {
+    DatabaseManager::getQueryExecutor().replaceMessage(
+        clientDBMessageInfo.first);
+    for (const auto &mediaInfo : clientDBMessageInfo.second) {
+      DatabaseManager::getQueryExecutor().replaceMedia(mediaInfo);
+    }
+  }
+}
 } // namespace comm
