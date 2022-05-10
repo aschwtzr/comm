@@ -1,6 +1,7 @@
 // @flow
 
 import * as React from 'react';
+import tinycolor from 'tinycolor2';
 
 import {
   changeThreadSettingsActionTypes,
@@ -51,8 +52,12 @@ function ThreadSettingsGeneralTab(
   }, [inputDisabled]);
 
   const changeQueued: boolean = React.useMemo(
-    () => Object.values(queuedChanges).some(v => v !== null && v !== undefined),
-    [queuedChanges],
+    () =>
+      !!queuedChanges.name ||
+      !!queuedChanges.description ||
+      (!!queuedChanges.color &&
+        !tinycolor.equals(threadInfo.color, queuedChanges.color)),
+    [queuedChanges, threadInfo.color],
   );
 
   const onChangeName = React.useCallback(
