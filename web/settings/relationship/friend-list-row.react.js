@@ -16,49 +16,50 @@ function FriendListRow(props: UserRowProps): React.Node {
   const { userInfo } = props;
 
   const { friendUser, unfriendUser } = useRelationshipCallbacks(userInfo.id);
-  let buttons = null;
-  if (userInfo.relationshipStatus === userRelationshipStatus.REQUEST_SENT) {
-    buttons = (
-      <button
-        className={classnames([css.button, css.destructive])}
-        onClick={unfriendUser}
-      >
-        Cancel request
-      </button>
-    );
-  } else if (
-    userInfo.relationshipStatus === userRelationshipStatus.REQUEST_RECEIVED
-  ) {
-    buttons = (
-      <>
-        <button className={css.button} onClick={friendUser}>
-          Accept
-        </button>
+  const buttons = React.useMemo(() => {
+    if (userInfo.relationshipStatus === userRelationshipStatus.REQUEST_SENT) {
+      return (
         <button
           className={classnames([css.button, css.destructive])}
           onClick={unfriendUser}
         >
-          Reject
+          Cancel request
         </button>
-      </>
-    );
-  } else if (userInfo.relationshipStatus === userRelationshipStatus.FRIEND) {
-    buttons = (
-      <div className={css.edit_menu}>
-        <Menu
-          icon={<SWMansionIcon icon="edit" size={22} />}
-          variant="member-actions"
-        >
-          <MenuItem
-            key="unfriend"
-            text="Unfriend"
-            icon="user-cross"
+      );
+    } else if (
+      userInfo.relationshipStatus === userRelationshipStatus.REQUEST_RECEIVED
+    ) {
+      return (
+        <>
+          <button className={css.button} onClick={friendUser}>
+            Accept
+          </button>
+          <button
+            className={classnames([css.button, css.destructive])}
             onClick={unfriendUser}
-          />
-        </Menu>
-      </div>
-    );
-  }
+          >
+            Reject
+          </button>
+        </>
+      );
+    } else if (userInfo.relationshipStatus === userRelationshipStatus.FRIEND) {
+      return (
+        <div className={css.edit_menu}>
+          <Menu
+            icon={<SWMansionIcon icon="edit" size={22} />}
+            variant="member-actions"
+          >
+            <MenuItem
+              key="unfriend"
+              text="Unfriend"
+              icon="user-cross"
+              onClick={unfriendUser}
+            />
+          </Menu>
+        </div>
+      );
+    }
+  }, [friendUser, unfriendUser, userInfo.relationshipStatus]);
 
   return (
     <div className={css.container}>
