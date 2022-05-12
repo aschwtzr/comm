@@ -2,5 +2,6 @@ steps:
   - command:
       - 'yarn cleaninstall --frozen-lockfile --skip-optional'
       - 'cd services && yarn build-all'
+      - 'yarn test-blob-service'
     agents:
       - 'docker=true'
