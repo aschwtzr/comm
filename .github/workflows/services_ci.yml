@@ -25,3 +25,11 @@ jobs:
       - name: Build Services
         working-directory: ./services
         run: yarn build-all
+
+      - name: Run Services
+        working-directory: ./services
+        run: yarn run-all-services-dev-mode
+
+      - name: Test Services
+        working-directory: ./services
+        run: yarn test-all-services-dev-mode
