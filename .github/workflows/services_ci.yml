@@ -25,3 +25,7 @@ jobs:
       - name: Build Services
         working-directory: ./services
         run: yarn build-all
+
+      - name: Test Blob service
+        working-directory: ./services
+        run: yarn test-blob-service
