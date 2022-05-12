@@ -10,13 +10,14 @@ namespace reactor {
 
 std::string
 CreateNewBackupReactor::generateBackupID(const std::string &userID) {
-  return generateUUID() + ID_SEPARATOR + std::to_string(this->created);
+  return tools::generateUUID() + tools::ID_SEPARATOR +
+      std::to_string(this->created);
 }
 
 std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
     backup::CreateNewBackupRequest request,
     backup::CreateNewBackupResponse *response) {
-  this->created = getCurrentTimestamp();
+  this->created = tools::getCurrentTimestamp();
   // we make sure that the blob client's state is flushed to the main memory
   // as there may be multiple threads from the pool taking over here
   const std::lock_guard<std::mutex> lock(this->reactorStateMutex);
@@ -54,7 +55,7 @@ std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
             this->userID + "] already exists, creation aborted");
       }
       response->set_backupid(this->backupID);
-      this->holder = generateHolder(this->backupID, this->dataHash);
+      this->holder = tools::generateHolder(this->backupID, this->dataHash);
       this->putReactor = std::make_shared<reactor::BlobPutClientReactor>(
           this->holder, this->dataHash, &this->blobPutDoneCV);
       this->blobClient.put(this->putReactor);
@@ -94,7 +95,7 @@ void CreateNewBackupReactor::terminateCallback() {
         this->userID,
         this->backupID,
         this->created,
-        generateRandomString(),
+        tools::generateRandomString(),
         this->holder,
         {});
     database::DatabaseManager::getInstance().putBackupItem(backupItem);

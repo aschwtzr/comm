@@ -23,7 +23,8 @@ void SendLogReactor::storeInDatabase() {
 }
 
 std::string SendLogReactor::generateLogID(const std::string &backupID) {
-  return backupID + ID_SEPARATOR + std::to_string(getCurrentTimestamp());
+  return backupID + tools::ID_SEPARATOR +
+      std::to_string(tools::getCurrentTimestamp());
 }
 
 void SendLogReactor::initializePutReactor() {
@@ -108,7 +109,8 @@ SendLogReactor::readRequest(backup::SendLogRequest request) {
           this->persistenceMethod = PersistenceMethod::BLOB;
         }
         if (this->value.empty()) {
-          this->value = generateHolder(this->backupID, this->logID, this->hash);
+          this->value =
+              tools::generateHolder(this->backupID, this->logID, this->hash);
         }
         this->initializePutReactor();
         this->putReactor->scheduleSendingDataChunk(std::move(chunk));

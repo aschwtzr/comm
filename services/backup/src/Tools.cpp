@@ -8,6 +8,7 @@
 
 namespace comm {
 namespace network {
+namespace tools {
 
 std::string generateRandomString(std::size_t length) {
   const std::string CHARACTERS =
@@ -26,18 +27,18 @@ std::string generateHolder(
     const std::string &resourceID,
     const std::string &blobHash) {
   if (resourceID.empty()) {
-    return backupID + ID_SEPARATOR + blobHash +
-        ID_SEPARATOR + generateUUID();
+    return backupID + ID_SEPARATOR + blobHash + ID_SEPARATOR +
+        tools::generateUUID();
   }
   return backupID + ID_SEPARATOR + resourceID + ID_SEPARATOR + blobHash +
-      ID_SEPARATOR + generateUUID();
+      ID_SEPARATOR + tools::generateUUID();
 }
 
-std::string generateHolder(
-    const std::string &backupID,
-    const std::string &blobHash) {
+std::string
+generateHolder(const std::string &backupID, const std::string &blobHash) {
   return generateHolder(backupID, "", blobHash);
 }
 
+} // namespace tools
 } // namespace network
 } // namespace comm
