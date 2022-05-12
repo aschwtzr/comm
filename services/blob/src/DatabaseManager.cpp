@@ -47,7 +47,7 @@ DatabaseManager::findBlobItem(const std::string &blobHash) {
 void DatabaseManager::removeBlobItem(const std::string &blobHash) {
   std::shared_ptr<BlobItem> item = this->findBlobItem(blobHash);
   if (item == nullptr) {
-    return;
+    throw std::runtime_error("removing item failed: item not found");
   }
   this->innerRemoveItem(*item);
 }
@@ -107,14 +107,13 @@ DatabaseManager::findReverseIndexItemsByHash(const std::string &blobHash) {
   return result;
 }
 
-bool DatabaseManager::removeReverseIndexItem(const std::string &holder) {
+void DatabaseManager::removeReverseIndexItem(const std::string &holder) {
   std::shared_ptr<database::ReverseIndexItem> item =
       findReverseIndexItemByHolder(holder);
   if (item == nullptr) {
-    return false;
+    throw std::runtime_error("removing item failed: item not found");
   }
   this->innerRemoveItem(*item);
-  return true;
 }
 
 } // namespace database

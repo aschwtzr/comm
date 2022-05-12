@@ -67,7 +67,7 @@ DatabaseManager::findSessionItem(const std::string &sessionID) {
 void DatabaseManager::removeSessionItem(const std::string &sessionID) {
   std::shared_ptr<DeviceSessionItem> item = this->findSessionItem(sessionID);
   if (item == nullptr) {
-    return;
+    throw std::runtime_error("removing item failed: item not found");
   }
   this->innerRemoveItem(*item);
 }
@@ -100,7 +100,7 @@ DatabaseManager::findSessionSignItem(const std::string &deviceID) {
 void DatabaseManager::removeSessionSignItem(const std::string &deviceID) {
   std::shared_ptr<SessionSignItem> item = this->findSessionSignItem(deviceID);
   if (item == nullptr) {
-    return;
+    throw std::runtime_error("removing item failed: item not found");
   }
   this->innerRemoveItem(*item);
 }
@@ -129,7 +129,7 @@ DatabaseManager::findPublicKeyItem(const std::string &deviceID) {
 void DatabaseManager::removePublicKeyItem(const std::string &deviceID) {
   std::shared_ptr<PublicKeyItem> item = this->findPublicKeyItem(deviceID);
   if (item == nullptr) {
-    return;
+    throw std::runtime_error("removing item failed: item not found");
   }
   this->innerRemoveItem(*item);
 }
@@ -203,7 +203,7 @@ DatabaseManager::findMessageItemsByReceiver(const std::string &toDeviceID) {
 void DatabaseManager::removeMessageItem(const std::string &messageID) {
   std::shared_ptr<MessageItem> item = this->findMessageItem(messageID);
   if (item == nullptr) {
-    return;
+    throw std::runtime_error("removing item failed: item not found");
   }
   this->innerRemoveItem(*item);
 }
