@@ -10,7 +10,7 @@ namespace reactor {
 
 std::string
 CreateNewBackupReactor::generateBackupID() {
-  return this->deviceID + getCurrentTimestamp();
+  return this->deviceID + tools::getCurrentTimestamp();
 }
 
 std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
@@ -61,7 +61,7 @@ std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
             this->userID + "] already exists, creation aborted");
       }
       response->set_backupid(this->backupID);
-      this->holder = generateHolder(this->dataHash, this->backupID);
+      this->holder = tools::generateHolder(this->dataHash, this->backupID);
       this->putReactor = std::make_shared<reactor::BlobPutClientReactor>(
           this->holder, this->dataHash, &this->blobPutDoneCV);
       this->blobClient.put(this->putReactor);
