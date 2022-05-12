@@ -25,3 +25,15 @@ jobs:
       - name: Build Services
         working-directory: ./services
         run: yarn build-all
+
+      - name: Test Backup service
+        working-directory: ./services
+        run: yarn test-backup-service
+
+      - name: Test Blob service
+        working-directory: ./services
+        run: yarn test-blob-service
+
+      - name: Test Tunnelbroker service
+        working-directory: ./services
+        run: yarn test-tunnelbroker-service

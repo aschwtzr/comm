@@ -2,5 +2,8 @@ steps:
   - command:
       - 'yarn cleaninstall --frozen-lockfile --skip-optional'
       - 'cd services && yarn build-all'
+      - 'COMM_SERVICES_DEV_MODE=1 yarn test-backup-service'
+      - 'COMM_SERVICES_DEV_MODE=1 yarn test-blob-service'
+      - 'COMM_SERVICES_DEV_MODE=1 yarn test-tunnelbroker-service'
     agents:
       - 'docker=true'
