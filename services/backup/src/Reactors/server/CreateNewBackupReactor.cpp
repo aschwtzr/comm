@@ -9,8 +9,7 @@ namespace network {
 namespace reactor {
 
 std::string CreateNewBackupReactor::generateBackupID() {
-  // mock
-  return generateRandomString();
+  return this->deviceID + std::to_string(getCurrentTimestamp());
 }
 
 std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
@@ -54,6 +53,12 @@ std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
 
       // TODO confirm - holder may be a backup id
       this->backupID = this->generateBackupID();
+      if (database::DatabaseManager::getInstance().findBackupItem(
+              this->userID, this->backupID) != nullptr) {
+        throw std::runtime_error(
+            "Backup with id [" + this->backupID + "] for user [" +
+            this->userID + "] already exists, creation aborted");
+      }
       response->set_backupid(this->backupID);
       this->holder = this->backupID;
       this->putReactor = std::make_shared<reactor::BlobPutClientReactor>(
