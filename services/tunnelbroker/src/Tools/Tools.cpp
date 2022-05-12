@@ -25,12 +25,6 @@ std::string generateRandomString(std::size_t length) {
   return random_string;
 }
 
-int64_t getCurrentTimestamp() {
-  using namespace std::chrono;
-  return duration_cast<milliseconds>(system_clock::now().time_since_epoch())
-      .count();
-}
-
 bool validateDeviceID(std::string deviceID) {
   try {
     static const std::regex deviceIDKeyserverRegexp("^ks:.*");

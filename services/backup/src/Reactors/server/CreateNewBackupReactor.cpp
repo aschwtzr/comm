@@ -8,9 +8,8 @@ namespace comm {
 namespace network {
 namespace reactor {
 
-std::string
-CreateNewBackupReactor::generateBackupID() {
-  return generateUUID();
+std::string CreateNewBackupReactor::generateBackupID() {
+  return tools::generateUUID();
 }
 
 std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
@@ -53,7 +52,7 @@ std::unique_ptr<ServerBidiReactorStatus> CreateNewBackupReactor::handleRequest(
             this->userID + "] already exists, creation aborted");
       }
       response->set_backupid(this->backupID);
-      this->holder = generateHolder(this->backupID, this->dataHash);
+      this->holder = tools::generateHolder(this->backupID, this->dataHash);
       this->putReactor = std::make_shared<reactor::BlobPutClientReactor>(
           this->holder, this->dataHash, &this->blobPutDoneCV);
       this->blobClient.put(this->putReactor);
