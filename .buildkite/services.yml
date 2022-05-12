@@ -1,6 +1,6 @@
 steps:
   - command:
       - 'yarn cleaninstall --frozen-lockfile --skip-optional'
-      - 'cd services && yarn build-all'
+      - 'cd services && yarn build-all && yarn test-all-services-dev-mode'
     agents:
       - 'docker=true'
