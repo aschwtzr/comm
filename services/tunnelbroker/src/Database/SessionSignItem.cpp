@@ -47,8 +47,8 @@ std::string SessionSignItem::getTableName() const {
       config::ConfigManager::OPTION_DYNAMODB_SESSIONS_VERIFICATION_TABLE);
 }
 
-PrimaryKey SessionSignItem::getPrimaryKey() const {
-  return PrimaryKey(SessionSignItem::FIELD_DEVICE_ID);
+PrimaryKeyName SessionSignItem::getPrimaryKeyName() const {
+  return PrimaryKeyName(SessionSignItem::FIELD_DEVICE_ID);
 }
 
 PrimaryKeyValue SessionSignItem::getPrimaryKeyValue() const {
