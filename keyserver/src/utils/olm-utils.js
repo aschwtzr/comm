@@ -1,14 +1,14 @@
 // @flow
 
-import olmConfig from '../../secrets/olm_config';
+import { importJSON } from './import-json';
 
 type OlmConfig = {
   +picklingKey: string,
   +pickledAccount: string,
 };
 
-function getOlmConfig(): OlmConfig {
-  return olmConfig;
+async function getOlmConfig(): Promise<OlmConfig> {
+  return await importJSON('secrets/olm_config');
 }
 
 export { getOlmConfig };
