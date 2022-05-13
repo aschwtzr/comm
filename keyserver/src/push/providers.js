@@ -5,6 +5,8 @@ import type { Provider as APNProvider } from '@parse/node-apn';
 import fcmAdmin from 'firebase-admin';
 import type { FirebaseApp } from 'firebase-admin';
 
+import { importJSON } from '../utils/import-json';
+
 type APNPushProfile = 'apn_config' | 'comm_apn_config';
 function getAPNPushProfileForCodeVersion(codeVersion: ?number): APNPushProfile {
   return codeVersion && codeVersion >= 87 ? 'comm_apn_config' : 'apn_config';
@@ -23,9 +25,9 @@ async function getAPNProvider(profile: APNPushProfile): Promise<?APNProvider> {
   }
   try {
     // $FlowFixMe
-    const apnConfig = await import(`../../secrets/${profile}`);
+    const apnConfig = await importJSON(`secrets/${profile}`);
     if (!cachedAPNProviders.has(profile)) {
-      cachedAPNProviders.set(profile, new apn.Provider(apnConfig.default));
+      cachedAPNProviders.set(profile, new apn.Provider(apnConfig));
     }
   } catch {
     if (!cachedAPNProviders.has(profile)) {
@@ -43,13 +45,13 @@ async function getFCMProvider(profile: FCMPushProfile): Promise<?FirebaseApp> {
   }
   try {
     // $FlowFixMe
-    const fcmConfig = await import(`../../secrets/${profile}`);
+    const fcmConfig = await importJSON(`secrets/${profile}`);
     if (!cachedFCMProviders.has(profile)) {
       cachedFCMProviders.set(
         profile,
         fcmAdmin.initializeApp(
           {
-            credential: fcmAdmin.credential.cert(fcmConfig.default),
+            credential: fcmAdmin.credential.cert(fcmConfig),
           },
           profile,
         ),
