@@ -5,7 +5,7 @@ import { endFirebase, endAPNs } from '../push/providers';
 import { publisher } from '../socket/redis';
 
 function endScript() {
-  getPool().end();
+  getPool()?.end();
   publisher.end();
   endFirebase();
   endAPNs();
