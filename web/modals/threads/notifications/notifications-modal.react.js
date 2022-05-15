@@ -63,10 +63,10 @@ function NotificationsModal(props: Props): React.Node {
 
   const isFocusedSelected = notificationSettings === 'focused';
   const focusedItem = React.useMemo(() => {
-    const description = [
-      ['Banner notifs', true],
-      ['Badge count', true],
-      ['Lives in Focused tab', true],
+    const statements = [
+      { statement: 'Banner notifs', isStatementValid: true },
+      { statement: 'Badge count', isStatementValid: true },
+      { statement: 'Lives in Focused tab', isStatementValid: true },
     ];
     const icon = (
       <SWMansionIcon
@@ -79,7 +79,7 @@ function NotificationsModal(props: Props): React.Node {
       <EnumSettingsOption
         selected={isFocusedSelected}
         title="Focused (enabled)"
-        description={description}
+        statements={statements}
         icon={icon}
         onSelect={onFocusedSelected}
       />
@@ -88,10 +88,10 @@ function NotificationsModal(props: Props): React.Node {
 
   const isFocusedBadgeOnlySelected = notificationSettings === 'badge-only';
   const focusedBadgeOnlyItem = React.useMemo(() => {
-    const description = [
-      ['Banner notifs', false],
-      ['Badge count', true],
-      ['Lives in Focused tab', true],
+    const statements = [
+      { statement: 'Banner notifs', isStatementValid: false },
+      { statement: 'Badge count', isStatementValid: true },
+      { statement: 'Lives in Focused tab', isStatementValid: true },
     ];
     const icon = (
       <SWMansionIcon
@@ -104,7 +104,7 @@ function NotificationsModal(props: Props): React.Node {
       <EnumSettingsOption
         selected={isFocusedBadgeOnlySelected}
         title="Focused (badge only)"
-        description={description}
+        statements={statements}
         icon={icon}
         onSelect={onBadgeOnlySelected}
       />
@@ -113,10 +113,10 @@ function NotificationsModal(props: Props): React.Node {
 
   const isBackgroundSelected = notificationSettings === 'background';
   const backgroundItem = React.useMemo(() => {
-    const description = [
-      ['Banner notifs', false],
-      ['Badge count', false],
-      ['Lives in Backgound tab', true],
+    const statements = [
+      { statement: 'Banner notifs', isStatementValid: false },
+      { statement: 'Badge count', isStatementValid: false },
+      { statement: 'Lives in Background tab', isStatementValid: true },
     ];
     const icon = (
       <SWMansionIcon
@@ -129,7 +129,7 @@ function NotificationsModal(props: Props): React.Node {
       <EnumSettingsOption
         selected={isBackgroundSelected}
         title="Background"
-        description={description}
+        statements={statements}
         icon={icon}
         onSelect={onBackgroundSelected}
       />
