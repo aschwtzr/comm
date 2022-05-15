@@ -2,6 +2,7 @@ div.optionInfo {
   display: flex;
   align-items: center;
   column-gap: 4px;
+  max-width: 160px;
 }
 
 div.optionInfoInvalid {
