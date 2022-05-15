@@ -12,7 +12,7 @@ type Props = {
   +onSelect: () => void,
   +icon: React.Node,
   +title: string,
-  +description: $ReadOnlyArray<[string, boolean]>,
+  +description: $ReadOnlyArray<[string, ?boolean]>,
 };
 
 function EnumSettingsOption(props: Props): React.Node {
