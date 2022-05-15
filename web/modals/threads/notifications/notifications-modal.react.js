@@ -12,9 +12,20 @@ import {
   useDispatchActionPromise,
 } from 'lib/utils/action-utils';
 
+import {
+  assetCacheURLPrefix,
+  backgroundNotificationsIllustrationFileName,
+  backgroundNotificationsIllustrationHeight,
+  backgroundNotificationsIllustrationWidth,
+  badgeOnlyNotificationsIllustrationFileName,
+  badgeOnlyNotificationsIllustrationHeight,
+  badgeOnlyNotificationsIllustrationWidth,
+  focusedNotificationsIllustrationFileName,
+  focusedNotificationsIllustrationHeight,
+  focusedNotificationsIllustrationWidth,
+} from '../../../assets.js';
 import Button from '../../../components/button.react';
 import { useSelector } from '../../../redux/redux-utils';
-import SWMansionIcon from '../../../SWMansionIcon.react';
 import Modal from '../../modal.react';
 import css from './notifications-modal.css';
 import NotificationsOption from './notifications-option.react';
@@ -46,8 +57,6 @@ function NotificationsModal(props: Props): React.Node {
     setNotificationSettings,
   ] = React.useState<NotificationSettings>(initialThreadSetting);
 
-  const notificationIconStyle = React.useMemo(() => ({ width: 'auto' }), []);
-
   const isFocusedSelected = notificationSettings === 'focused';
   const focusedItem = React.useMemo(() => {
     const description = [
@@ -56,10 +65,10 @@ function NotificationsModal(props: Props): React.Node {
       ['Lives in Focused tab', true],
     ];
     const icon = (
-      <SWMansionIcon
-        icon="all-notifs"
-        size={86}
-        style={notificationIconStyle}
+      <img
+        src={`${assetCacheURLPrefix}/${focusedNotificationsIllustrationFileName}`}
+        height={focusedNotificationsIllustrationHeight}
+        width={focusedNotificationsIllustrationWidth}
       />
     );
     return (
@@ -71,7 +80,7 @@ function NotificationsModal(props: Props): React.Node {
         onSelect={() => setNotificationSettings('focused')}
       />
     );
-  }, [isFocusedSelected, notificationIconStyle]);
+  }, [isFocusedSelected]);
 
   const isFocusedBadgeOnlySelected = notificationSettings === 'badge-only';
   const focusedBadgeOnlyItem = React.useMemo(() => {
@@ -81,10 +90,10 @@ function NotificationsModal(props: Props): React.Node {
       ['Lives in Focused tab', true],
     ];
     const icon = (
-      <SWMansionIcon
-        icon="badge-notifs"
-        size={86}
-        style={notificationIconStyle}
+      <img
+        src={`${assetCacheURLPrefix}/${badgeOnlyNotificationsIllustrationFileName}`}
+        height={badgeOnlyNotificationsIllustrationHeight}
+        width={badgeOnlyNotificationsIllustrationWidth}
       />
     );
     return (
@@ -96,7 +105,7 @@ function NotificationsModal(props: Props): React.Node {
         onSelect={() => setNotificationSettings('badge-only')}
       />
     );
-  }, [isFocusedBadgeOnlySelected, notificationIconStyle]);
+  }, [isFocusedBadgeOnlySelected]);
 
   const isBackgroundSelected = notificationSettings === 'background';
   const backgroundItem = React.useMemo(() => {
@@ -106,10 +115,10 @@ function NotificationsModal(props: Props): React.Node {
       ['Lives in Backgound tab', true],
     ];
     const icon = (
-      <SWMansionIcon
-        icon="muted-notifs"
-        size={86}
-        style={notificationIconStyle}
+      <img
+        src={`${assetCacheURLPrefix}/${backgroundNotificationsIllustrationFileName}`}
+        height={backgroundNotificationsIllustrationHeight}
+        width={backgroundNotificationsIllustrationWidth}
       />
     );
     return (
@@ -121,7 +130,7 @@ function NotificationsModal(props: Props): React.Node {
         onSelect={() => setNotificationSettings('background')}
       />
     );
-  }, [isBackgroundSelected, notificationIconStyle]);
+  }, [isBackgroundSelected]);
 
   const dispatchActionPromise = useDispatchActionPromise();
 
