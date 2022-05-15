@@ -23,7 +23,7 @@ import {
   focusedNotificationsIllustrationFileName,
   focusedNotificationsIllustrationHeight,
   focusedNotificationsIllustrationWidth,
-} from '../../../assets.js';
+} from '../../../assets';
 import Button from '../../../components/button.react';
 import { useSelector } from '../../../redux/redux-utils';
 import Modal from '../../modal.react';
