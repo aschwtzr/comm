@@ -13,10 +13,10 @@ import {
 } from 'lib/utils/action-utils';
 
 import Button from '../../../components/button.react';
+import EnumSettingsOption from '../../../components/enum-settings-option.react';
 import { useSelector } from '../../../redux/redux-utils';
 import SWMansionIcon from '../../../SWMansionIcon.react';
 import Modal from '../../modal.react';
-import EnumSettingsOption from './enum-settings-option.react';
 import css from './notifications-modal.css';
 
 type NotificationSettings = 'focused' | 'badge-only' | 'background';
