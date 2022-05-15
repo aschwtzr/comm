@@ -57,6 +57,19 @@ function NotificationsModal(props: Props): React.Node {
     setNotificationSettings,
   ] = React.useState<NotificationSettings>(initialThreadSetting);
 
+  const onFocusedSelected = React.useCallback(
+    () => setNotificationSettings('focused'),
+    [],
+  );
+  const onBadgeOnlySelected = React.useCallback(
+    () => setNotificationSettings('badge-only'),
+    [],
+  );
+  const onBackgroundSelected = React.useCallback(
+    () => setNotificationSettings('background'),
+    [],
+  );
+
   const isFocusedSelected = notificationSettings === 'focused';
   const focusedItem = React.useMemo(() => {
     const description = [
@@ -77,10 +90,10 @@ function NotificationsModal(props: Props): React.Node {
         title="Focused (enabled)"
         description={description}
         icon={icon}
-        onSelect={() => setNotificationSettings('focused')}
+        onSelect={onFocusedSelected}
       />
     );
-  }, [isFocusedSelected]);
+  }, [isFocusedSelected, onFocusedSelected]);
 
   const isFocusedBadgeOnlySelected = notificationSettings === 'badge-only';
   const focusedBadgeOnlyItem = React.useMemo(() => {
@@ -102,10 +115,10 @@ function NotificationsModal(props: Props): React.Node {
         title="Focused (badge only)"
         description={description}
         icon={icon}
-        onSelect={() => setNotificationSettings('badge-only')}
+        onSelect={onBadgeOnlySelected}
       />
     );
-  }, [isFocusedBadgeOnlySelected]);
+  }, [isFocusedBadgeOnlySelected, onBadgeOnlySelected]);
 
   const isBackgroundSelected = notificationSettings === 'background';
   const backgroundItem = React.useMemo(() => {
@@ -127,10 +140,10 @@ function NotificationsModal(props: Props): React.Node {
         title="Background"
         description={description}
         icon={icon}
-        onSelect={() => setNotificationSettings('background')}
+        onSelect={onBackgroundSelected}
       />
     );
-  }, [isBackgroundSelected]);
+  }, [isBackgroundSelected, onBackgroundSelected]);
 
   const dispatchActionPromise = useDispatchActionPromise();
 
