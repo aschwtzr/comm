@@ -6,21 +6,21 @@ import {
   changeThreadSettings,
   changeThreadSettingsActionTypes,
 } from 'lib/actions/thread-actions.js';
-import { threadTypeDescriptions } from 'lib/shared/thread-utils';
-import { type SetState } from 'lib/types/hook-types';
+import { threadTypeDescriptions } from 'lib/shared/thread-utils.js';
+import { type SetState } from 'lib/types/hook-types.js';
 import {
   type ThreadInfo,
   type ThreadChanges,
   assertThreadType,
   threadTypes,
-} from 'lib/types/thread-types';
+} from 'lib/types/thread-types.js';
 import {
   useDispatchActionPromise,
   useServerCall,
 } from 'lib/utils/action-utils.js';
 
-import Button from '../../components/button.react.js';
-import { useModalContext } from '../modal-provider.react.js';
+import Button from '../../../components/button.react.js';
+import { useModalContext } from '../../modal-provider.react.js';
 import css from './thread-settings-privacy-tab.css';
 
 const { COMMUNITY_OPEN_SUBTHREAD, COMMUNITY_SECRET_SUBTHREAD } = threadTypes;

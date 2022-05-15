@@ -6,25 +6,25 @@ import * as React from 'react';
 import {
   deleteThreadActionTypes,
   changeThreadSettingsActionTypes,
-} from 'lib/actions/thread-actions';
-import { createLoadingStatusSelector } from 'lib/selectors/loading-selectors';
-import { threadInfoSelector } from 'lib/selectors/thread-selectors';
-import { threadHasPermission, robotextName } from 'lib/shared/thread-utils';
+} from 'lib/actions/thread-actions.js';
+import { createLoadingStatusSelector } from 'lib/selectors/loading-selectors.js';
+import { threadInfoSelector } from 'lib/selectors/thread-selectors.js';
+import { threadHasPermission, robotextName } from 'lib/shared/thread-utils.js';
 import {
   type ThreadInfo,
   threadTypes,
   threadPermissions,
   type ThreadChanges,
-} from 'lib/types/thread-types';
+} from 'lib/types/thread-types.js';
 
-import Tabs from '../../components/tabs.react';
-import { useModalContext } from '../../modals/modal-provider.react';
-import { useSelector } from '../../redux/redux-utils';
-import Modal from '../modal.react';
-import ThreadSettingsDeleteTab from './thread-settings-delete-tab.react';
-import ThreadSettingsGeneralTab from './thread-settings-general-tab.react';
+import Tabs from '../../../components/tabs.react.js';
+import { useSelector } from '../../../redux/redux-utils.js';
+import { useModalContext } from '../../modal-provider.react.js';
+import Modal from '../../modal.react.js';
+import ThreadSettingsDeleteTab from './thread-settings-delete-tab.react.js';
+import ThreadSettingsGeneralTab from './thread-settings-general-tab.react.js';
 import css from './thread-settings-modal.css';
-import ThreadSettingsPrivacyTab from './thread-settings-privacy-tab.react';
+import ThreadSettingsPrivacyTab from './thread-settings-privacy-tab.react.js';
 
 type TabType = 'general' | 'privacy' | 'delete';
 type BaseProps = {
