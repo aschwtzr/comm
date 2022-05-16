@@ -29,4 +29,4 @@ COPY services/lib/src/* src/
 
 RUN scripts/build_service.sh
 
-CMD if [ "$COMM_TEST_SERVICES" -eq 1 ]; then scripts/run_service.sh; else scripts/run_service.sh; fi
+CMD if [ "$COMM_TEST_SERVICES" -eq 1 ]; then scripts/run_tests.sh; else scripts/run_service.sh; fi
