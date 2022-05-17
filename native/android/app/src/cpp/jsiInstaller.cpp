@@ -1,5 +1,6 @@
 #include "CommCoreModule.h"
 #include "GlobalNetworkSingletonJNIHelper.h"
+#include "MessageOperationsUtilitiesJNIHelper.h"
 #include "SQLiteQueryExecutor.h"
 #include "jniHelpers.h"
 #include <CallInvokerHolder.h>
@@ -52,5 +53,6 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
   return jni::initialize(vm, [] {
     CommHybrid::registerNatives();
     comm::GlobalNetworkSingletonJNIHelper::registerNatives();
+    comm::MessageOperationsUtilitiesJNIHelper::registerNatives();
   });
 }
