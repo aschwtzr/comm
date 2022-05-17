@@ -1,5 +1,8 @@
-use futures_core::Stream;
 use std::pin::Pin;
+
+use futures_core::Stream;
+use tokio::sync::mpsc;
+use tokio_stream::wrappers::ReceiverStream;
 use tonic::{Request, Response, Status};
 
 use crate::config::Config;
@@ -46,7 +49,13 @@ impl IdentityService for MyIdentityService {
     request: Request<tonic::Streaming<LoginRequest>>,
   ) -> Result<Response<Self::LoginUserStream>, Status> {
     println!("Got a login request: {:?}", request);
-    unimplemented!()
+    let (_tx, rx) = mpsc::channel(1);
+    tokio::spawn(async move {
+      let db_result =
+        self.client.get_pake_registration("foo".to_string()).await;
+    });
+    let out_stream = ReceiverStream::new(rx);
+    Ok(Response::new(Box::pin(out_stream) as Self::LoginUserStream))
   }
 
   async fn verify_user_token(

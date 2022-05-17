@@ -700,6 +700,7 @@ dependencies = [
  "rusoto_dynamodb",
  "sha2",
  "tokio",
+ "tokio-stream",
  "tonic",
  "tonic-build",
  "tracing",
