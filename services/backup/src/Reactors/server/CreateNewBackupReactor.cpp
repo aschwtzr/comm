@@ -91,8 +91,8 @@ void CreateNewBackupReactor::terminateCallback() {
     database::BackupItem backupItem(
         this->userID,
         this->backupID,
-        getCurrentTimestamp(),
-        generateRandomString(),
+        tools::getCurrentTimestamp(),
+        tools::generateRandomString(),
         this->holder,
         {});
     database::DatabaseManager::getInstance().putBackupItem(backupItem);
