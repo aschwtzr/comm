@@ -5,6 +5,7 @@ import type { QueryResults } from 'mysql';
 
 import { getMessageForException } from 'lib/utils/errors';
 
+import { updateRolesAndPermissionsForAllThreads } from '../updaters/thread-permission-updaters';
 import { dbQuery, SQL } from './database';
 
 async function makeSureBaseRoutePathExists(filePath: string): Promise<void> {
@@ -83,6 +84,12 @@ const migrations: $ReadOnlyMap<number, () => Promise<void>> = new Map([
     async () => {
       await fixBaseRoutePathForLocalhost('facts/commapp_url.json');
       await fixBaseRoutePathForLocalhost('facts/squadcal_url.json');
+    },
+  ],
+  [
+    3,
+    async () => {
+      await updateRolesAndPermissionsForAllThreads();
     },
   ],
 ]);
