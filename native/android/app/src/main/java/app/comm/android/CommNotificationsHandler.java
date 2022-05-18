@@ -4,10 +4,16 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import app.comm.android.fbjni.CommSecureStore;
+import app.comm.android.fbjni.MessageOperationsUtilities;
 import app.comm.android.fbjni.NetworkModule;
 import com.google.firebase.messaging.RemoteMessage;
+import expo.modules.securestore.SecureStoreModule;
 import io.invertase.firebase.messaging.RNFirebaseMessagingService;
+import java.io.File;
 import me.leolin.shortcutbadger.ShortcutBadger;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * We're extending RNFirebaseMessagingService here instead of
@@ -40,11 +46,15 @@ public class CommNotificationsHandler extends RNFirebaseMessagingService {
   private static final String BADGE_KEY = "badge";
   private static final String BADGE_ONLY_KEY = "badgeOnly";
   private static final String BACKGROUND_NOTIF_TYPE_KEY = "backgroundNotifType";
+  private static final String CUSTOM_NOTIFICATION_KEY = "custom_notification";
+  private static final String MESSAGE_INFOS_KEY = "messageInfos";
   private NotificationManager notificationManager;
 
   @Override
   public void onCreate() {
     super.onCreate();
+    CommSecureStore.getInstance().initialize(
+        new SecureStoreModule(this.getApplicationContext()));
     notificationManager = (NotificationManager)this.getSystemService(
         Context.NOTIFICATION_SERVICE);
   }
@@ -88,6 +98,29 @@ public class CommNotificationsHandler extends RNFirebaseMessagingService {
     if ("PING".equals(backgroundNotifType)) {
       NetworkModule.sendPong();
       return;
+    }
+
+    File sqliteFilePath =
+        this.getApplicationContext().getDatabasePath("comm.sqlite");
+
+    if (!sqliteFilePath.exists()) {
+      Log.w("COMM", "Database not existing yet. Skipping notification");
+    } else if (message.getData().containsKey(CUSTOM_NOTIFICATION_KEY)) {
+      // codeVersion < 31
+      try {
+        JSONObject customNotification =
+            new JSONObject(message.getData().get(CUSTOM_NOTIFICATION_KEY));
+        MessageOperationsUtilities.storeNotification(
+            sqliteFilePath.toString(),
+            customNotification.getString(MESSAGE_INFOS_KEY));
+      } catch (JSONException e) {
+        Log.e("COMM", "Invalid JSON format for custom notification", e);
+      }
+    } else if (message.getData().containsKey(MESSAGE_INFOS_KEY)) {
+      MessageOperationsUtilities.storeNotification(
+          sqliteFilePath.toString(), message.getData().get(MESSAGE_INFOS_KEY));
+    } else {
+      Log.w("COMM", "Received notification without messageInfos field");
     }
 
     super.onMessageReceived(message);
