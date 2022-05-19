@@ -83,6 +83,25 @@ AddAttachmentReactor::readRequest(backup::AddAttachmentRequest request) {
       return nullptr;
     };
     case State::DATA_CHUNK: {
+      if (this->holder.empty()) {
+        if (this->parentType == ParentType::BACKUP) {
+          this->holder = tools::generateHolder(
+              this->backupItem->getBackupID(), this->hash);
+        } else if (this->parentType == ParentType::LOG) {
+          this->holder = tools::generateHolder(
+              this->backupItem->getBackupID(),
+              this->logItem->getLogID(),
+              this->hash);
+        }
+      }
+      std::unique_ptr<std::string> chunk = std::make_unique<std::string>(
+          std::move(*request.mutable_datachunk()));
+      if (chunk->size() == 0) {
+        return std::make_unique<grpc::Status>(grpc::Status::OK);
+      }
+      this->initializePutReactor();
+      this->putReactor->scheduleSendingDataChunk(std::move(chunk));
+      return nullptr;
     };
   }
   throw std::runtime_error("send attachment - invalid state");
