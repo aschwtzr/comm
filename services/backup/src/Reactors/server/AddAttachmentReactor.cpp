@@ -28,6 +28,18 @@ void AddAttachmentReactor::initializePutReactor() {
 }
 
 void AddAttachmentReactor::storeInDatabase() {
+  // append to backup or log's attachment holders string: this->holder
+  if (this->parentType == ParentType::BACKUP) {
+    this->backupItem->appendAttachmentHolder(this->holder);
+    database::DatabaseManager::getInstance().putBackupItem(*this->backupItem);
+    return;
+  }
+  if (this->parentType == ParentType::LOG) {
+    this->logItem->appendAttachmentHolder(this->holder);
+    database::DatabaseManager::getInstance().putLogItem(*this->logItem);
+    return;
+  }
+  throw std::runtime_error("unhandled parent type");
 }
 
 std::unique_ptr<grpc::Status>
