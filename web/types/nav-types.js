@@ -10,7 +10,7 @@ export type NavInfo = {
   +tab: NavigationTab,
   +activeChatThreadID: ?string,
   +pendingThread?: ThreadInfo,
-  +settingsSection?: 'account',
+  +settingsSection?: 'account' | 'danger-zone',
 };
 
 export const updateNavInfoActionType = 'UPDATE_NAV_INFO';

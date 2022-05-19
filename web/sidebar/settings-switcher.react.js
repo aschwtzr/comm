@@ -14,6 +14,7 @@ function tabSelector(state: AppState) {
 
 function SettingsSwitcher(): React.Node {
   const dispatch = useDispatch();
+
   const onClickAccountSettings = React.useCallback(
     (event: SyntheticEvent<HTMLAnchorElement>) => {
       event.preventDefault();
@@ -24,7 +25,6 @@ function SettingsSwitcher(): React.Node {
     },
     [dispatch],
   );
-
   const accountSettingsNavigationItem = React.useMemo(
     () => (
       <div className={css.navigationPanelTab} onClick={onClickAccountSettings}>
@@ -34,10 +34,32 @@ function SettingsSwitcher(): React.Node {
     [onClickAccountSettings],
   );
 
+  const onClickDangerZone = React.useCallback(
+    (event: SyntheticEvent<HTMLAnchorElement>) => {
+      event.preventDefault();
+      dispatch({
+        type: updateNavInfoActionType,
+        payload: { tab: 'settings', settingsSection: 'danger-zone' },
+      });
+    },
+    [dispatch],
+  );
+  const dangerZoneNavigationItem = React.useMemo(
+    () => (
+      <div className={css.navigationPanelTab} onClick={onClickDangerZone}>
+        <p>Danger Zone</p>
+      </div>
+    ),
+    [onClickDangerZone],
+  );
+
   return (
     <NavigationPanel.Container tabSelector={tabSelector}>
       <NavigationPanel.Item tab="account">
         {accountSettingsNavigationItem}
+      </NavigationPanel.Item>
+      <NavigationPanel.Item tab="danger-zone">
+        {dangerZoneNavigationItem}
       </NavigationPanel.Item>
     </NavigationPanel.Container>
   );
