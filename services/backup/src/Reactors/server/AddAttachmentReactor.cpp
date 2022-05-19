@@ -32,6 +32,18 @@ AddAttachmentReactor::readRequest(backup::AddAttachmentRequest request) {
       return nullptr;
     };
     case State::BACKUP_ID: {
+      if (!request.has_backupid()) {
+        throw std::runtime_error("backup id expected but not received");
+      }
+      this->backupItem =
+          database::DatabaseManager::getInstance().findBackupItem(
+              this->userID, request.backupid());
+      if (this->backupItem == nullptr) {
+        throw std::runtime_error(
+            "trying to add an attachment for a non-existent backup");
+      }
+      this->state = State::LOG_ID;
+      return nullptr;
     };
     case State::LOG_ID: {
     };
