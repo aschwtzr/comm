@@ -6,8 +6,13 @@ import {
   changeThreadSettingsActionTypes,
   changeThreadSettings,
 } from 'lib/actions/thread-actions';
+import { threadHasPermission } from 'lib/shared/thread-utils';
 import { type SetState } from 'lib/types/hook-types';
-import { type ThreadInfo, type ThreadChanges } from 'lib/types/thread-types';
+import {
+  type ThreadInfo,
+  type ThreadChanges,
+  threadPermissions,
+} from 'lib/types/thread-types';
 import {
   useDispatchActionPromise,
   useServerCall,
@@ -128,6 +133,11 @@ function ThreadSettingsGeneralTab(
     [changeThreadSettingsAction, dispatchActionPromise],
   );
 
+  const threadNameInputDisabled = React.useMemo(
+    () => !threadHasPermission(threadInfo, threadPermissions.EDIT_THREAD_NAME),
+    [threadInfo],
+  );
+
   return (
     <form method="POST">
       <div>
@@ -138,7 +148,7 @@ function ThreadSettingsGeneralTab(
             value={firstLine(queuedChanges.name ?? threadInfo.name)}
             placeholder={threadNamePlaceholder}
             onChange={onChangeName}
-            disabled={inputDisabled}
+            disabled={inputDisabled || threadNameInputDisabled}
             ref={nameInputRef}
           />
         </div>
