@@ -24,6 +24,12 @@ AddAttachmentReactor::readRequest(backup::AddAttachmentRequest request) {
   const std::lock_guard<std::mutex> lock(this->reactorStateMutex);
   switch (this->state) {
     case State::USER_ID: {
+      if (!request.has_userid()) {
+        throw std::runtime_error("user id expected but not received");
+      }
+      this->userID = request.userid();
+      this->state = State::BACKUP_ID;
+      return nullptr;
     };
     case State::BACKUP_ID: {
     };
