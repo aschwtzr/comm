@@ -62,6 +62,12 @@ AddAttachmentReactor::readRequest(backup::AddAttachmentRequest request) {
       return nullptr;
     };
     case State::DATA_HASH: {
+      if (!request.has_datahash()) {
+        throw std::runtime_error("data hash expected but not received");
+      }
+      this->hash = request.datahash();
+      this->state = State::DATA_CHUNK;
+      return nullptr;
     };
     case State::DATA_CHUNK: {
     };
