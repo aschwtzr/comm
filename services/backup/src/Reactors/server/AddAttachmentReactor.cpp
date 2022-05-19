@@ -46,6 +46,20 @@ AddAttachmentReactor::readRequest(backup::AddAttachmentRequest request) {
       return nullptr;
     };
     case State::LOG_ID: {
+      if (!request.has_logid()) {
+        this->state = State::DATA_HASH;
+        this->parentType = ParentType::BACKUP;
+        return nullptr;
+      }
+      this->parentType = ParentType::LOG;
+      this->logItem = database::DatabaseManager::getInstance().findLogItem(
+          this->backupItem->getBackupID(), request.logid());
+      if (logItem == nullptr) {
+        throw std::runtime_error(
+            "trying to add an attachment for a non-existent log");
+      }
+      this->state = State::DATA_HASH;
+      return nullptr;
     };
     case State::DATA_HASH: {
     };
