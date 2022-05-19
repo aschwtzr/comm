@@ -12,6 +12,19 @@ namespace network {
 namespace reactor {
 
 void AddAttachmentReactor::initializePutReactor() {
+  if (this->holder.empty()) {
+    throw std::runtime_error(
+        "put reactor cannot be initialized with empty value");
+  }
+  if (this->hash.empty()) {
+    throw std::runtime_error(
+        "put reactor cannot be initialized with empty hash");
+  }
+  if (this->putReactor == nullptr) {
+    this->putReactor = std::make_shared<reactor::BlobPutClientReactor>(
+        this->holder, this->hash, &this->blobPutDoneCV);
+    this->blobClient.put(this->putReactor);
+  }
 }
 
 void AddAttachmentReactor::storeInDatabase() {
