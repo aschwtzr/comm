@@ -120,6 +120,23 @@ AddAttachmentReactor::readRequest(backup::AddAttachmentRequest request) {
 }
 
 void AddAttachmentReactor::terminateCallback() {
+  const std::lock_guard<std::mutex> lock(this->reactorStateMutex);
+
+  if (this->putReactor == nullptr) {
+    throw std::runtime_error(
+        "invalid state: put reactor not initialized when terminating the "
+        "reactor");
+  }
+  this->putReactor->scheduleSendingDataChunk(std::make_unique<std::string>(""));
+  std::unique_lock<std::mutex> lockPut(this->blobPutDoneCVMutex);
+  if (this->putReactor->getStatusHolder()->state != ReactorState::DONE) {
+    this->blobPutDoneCV.wait(lockPut);
+  } else if (!this->putReactor->getStatusHolder()->getStatus().ok()) {
+    throw std::runtime_error(
+        this->putReactor->getStatusHolder()->getStatus().error_message());
+  }
+  // store in db only when we successfully upload chunks
+  this->storeInDatabase();
 }
 
 } // namespace reactor
