@@ -66,5 +66,14 @@ void DeliveryBroker::erase(const std::string deviceID) {
   this->messagesMap.erase(deviceID);
 };
 
+void DeliveryBroker::deleteQueueIfEmpty(const std::string clientDeviceID) {
+  // If clientDeviceID messages queue is empty we don't need to store
+  // `folly::MPMCQueue` for it and need to free memory to fix possible 'ghost'
+  // queues.
+  if (DeliveryBroker::getInstance().isEmpty(clientDeviceID)) {
+    DeliveryBroker::getInstance().erase(clientDeviceID);
+  }
+};
+
 } // namespace network
 } // namespace comm
