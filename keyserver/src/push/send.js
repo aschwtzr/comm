@@ -466,7 +466,7 @@ function prepareIOSNotification(
   collapseKey: ?string,
   badgeOnly: boolean,
   unreadCount: number,
-  codeVersion: ?number,
+  codeVersion: number,
 ): apn.Notification {
   const uniqueID = uuidv4();
   const notification = new apn.Notification();
@@ -492,6 +492,9 @@ function prepareIOSNotification(
   notification.payload.id = uniqueID;
   notification.payload.threadID = threadInfo.id;
   notification.payload.messageInfos = JSON.stringify(newRawMessageInfos);
+  if (codeVersion > 1000) {
+    notification.mutableContent = true;
+  }
   if (collapseKey) {
     notification.collapseId = collapseKey;
   }
