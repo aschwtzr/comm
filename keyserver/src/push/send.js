@@ -492,6 +492,7 @@ function prepareIOSNotification(
   notification.payload.id = uniqueID;
   notification.payload.threadID = threadInfo.id;
   notification.payload.messageInfos = JSON.stringify(newRawMessageInfos);
+  notification.mutableContent = true;
   if (collapseKey) {
     notification.collapseId = collapseKey;
   }
