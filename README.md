@@ -1,4 +1,4 @@
-## Comm
+# Comm
 
 Comm is the working name of this open source messaging project.
 
