@@ -57,23 +57,6 @@ class AccountDeleteModal extends React.PureComponent<Props, State> {
 
   render() {
     const { inputDisabled } = this.props;
-    const mainContent = (
-      <p className={css['italic']}>
-        Your account will be permanently deleted. There is no way to reverse
-        this.
-      </p>
-    );
-
-    const buttons = (
-      <Button
-        variant="danger"
-        type="submit"
-        onClick={this.onDelete}
-        disabled={inputDisabled}
-      >
-        Delete account
-      </Button>
-    );
 
     let errorMsg;
     if (this.state.errorMessage) {
@@ -86,25 +69,28 @@ class AccountDeleteModal extends React.PureComponent<Props, State> {
       <Modal name="Delete Account" onClose={this.props.popModal} size="large">
         <div className={css['modal-body']}>
           <form method="POST">
-            {mainContent}
-            <div className={css['user-settings-current-password']}>
-              <p className={css['confirm-account-password']}>
-                Please enter your current password to confirm your identity
-              </p>
-              <div className={css['form-title']}>Current password</div>
-              <div className={css['form-content']}>
-                <Input
-                  type="password"
-                  placeholder="Current password"
-                  value={this.state.currentPassword}
-                  onChange={this.onChangeCurrentPassword}
-                  disabled={inputDisabled}
-                  ref={this.currentPasswordInputRef}
-                />
-              </div>
-            </div>
+            <p className={css['warning']}>
+              Your account will be permanently deleted.
+              <br /> There is no way to reverse this.
+            </p>
+            <Input
+              type="password"
+              placeholder="Current password"
+              value={this.state.currentPassword}
+              onChange={this.onChangeCurrentPassword}
+              disabled={inputDisabled}
+              ref={this.currentPasswordInputRef}
+              label="Current password"
+            />
             <div className={css['form-footer']}>
-              {buttons}
+              <Button
+                variant="danger"
+                type="submit"
+                onClick={this.onDelete}
+                disabled={inputDisabled}
+              >
+                Delete Account
+              </Button>
               {errorMsg}
             </div>
           </form>
