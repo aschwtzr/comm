@@ -1,15 +1,21 @@
 use futures_core::Stream;
+use opaque_ke::{
+  errors::ProtocolError, keypair::Key,
+  RegistrationRequest as PakeRegistrationRequest, ServerRegistration,
+};
+use rand::{CryptoRng, Rng};
 use std::pin::Pin;
+use tokio::sync::mpsc::{error::SendError, Sender};
 use tonic::{Request, Response, Status};
 
-use crate::config::Config;
-use crate::database::DatabaseClient;
+use crate::{config::Config, database::DatabaseClient, opaque::Cipher};
 
 pub use proto::identity_service_server::IdentityServiceServer;
 use proto::{
-  identity_service_server::IdentityService, LoginRequest, LoginResponse,
-  RegistrationRequest, RegistrationResponse, VerifyUserTokenRequest,
-  VerifyUserTokenResponse,
+  identity_service_server::IdentityService,
+  registration_response::Data::PakeRegistrationResponse, LoginRequest,
+  LoginResponse, RegistrationRequest, RegistrationResponse,
+  VerifyUserTokenRequest, VerifyUserTokenResponse,
 };
 
 mod proto {
@@ -56,4 +62,36 @@ impl IdentityService for MyIdentityService {
     println!("Got a lookup request: {:?}", request);
     unimplemented!()
   }
+}
+
+async fn pake_registration_start(
+  pake_registration_request: Vec<u8>,
+  rng: &mut (impl Rng + CryptoRng),
+  server_secret_key: &Key,
+  tx: Sender<Result<RegistrationResponse, Status>>,
+) -> Result<(), Error> {
+  let server_registration_start_result = ServerRegistration::<Cipher>::start(
+    rng,
+    PakeRegistrationRequest::deserialize(&pake_registration_request)?,
+    &server_secret_key,
+  )
+  .map_err(Error::Pake)?;
+  tx.send(Ok(RegistrationResponse {
+    data: Some(PakeRegistrationResponse(
+      server_registration_start_result.message.serialize(),
+    )),
+  }))
+  .await
+  .map_err(Error::Channel)?;
+  Ok(())
+}
+
+#[derive(
+  Debug, derive_more::Display, derive_more::From, derive_more::Error,
+)]
+pub enum Error {
+  #[display(...)]
+  Pake(ProtocolError),
+  #[display(...)]
+  Channel(SendError<Result<RegistrationResponse, Status>>),
 }
