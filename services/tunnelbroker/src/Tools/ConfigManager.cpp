@@ -94,6 +94,11 @@ std::string ConfigManager::getParameter(std::string param) {
     throw std::runtime_error(
         "ConfigManager Error: config parameter " + param + " is not set.");
   }
+  if (this->variablesMap[param].as<std::string>().empty()) {
+    throw std::runtime_error(
+        "ConfigManager Error: config parameter " + param +
+        " can not be empty.");
+  }
   return this->variablesMap[param].as<std::string>();
 }
 
