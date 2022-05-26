@@ -1,9 +1,9 @@
 use opaque_ke::{errors::PakeError, keypair::Key};
 use std::{env, fs, io, path::Path};
 
-#[derive(Default, Debug)]
+#[derive(Debug)]
 pub struct Config {
-  server_secret_key: Option<Key>,
+  pub server_secret_key: Key,
 }
 
 impl Config {
@@ -14,7 +14,7 @@ impl Config {
     path.set_extension("txt");
     let key = get_key_from_file(path)?;
     Ok(Self {
-      server_secret_key: Some(key),
+      server_secret_key: key,
     })
   }
 }
