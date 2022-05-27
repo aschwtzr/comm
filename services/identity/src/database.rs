@@ -84,7 +84,7 @@ impl DatabaseClient {
     &self,
     user_id: String,
     registration: ServerRegistration<Cipher>,
-  ) -> Result<PutItemOutput, RusotoError<PutItemError>> {
+  ) -> Result<PutItemOutput, Error> {
     let input = PutItemInput {
       table_name: "identity-pake-registration".to_string(),
       item: HashMap::from([
@@ -105,7 +105,7 @@ impl DatabaseClient {
       ]),
       ..PutItemInput::default()
     };
-    self.client.put_item(input).await
+    self.client.put_item(input).await.map_err(Error::RusotoPut)
   }
 
   pub async fn get_token(
