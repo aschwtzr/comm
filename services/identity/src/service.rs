@@ -1,9 +1,9 @@
 use futures_core::Stream;
 use opaque_ke::{
-  errors::ProtocolError, keypair::Key, CredentialRequest,
-  RegistrationRequest as PakeRegistrationRequest, RegistrationUpload,
-  ServerLogin, ServerLoginStartParameters, ServerLoginStartResult,
-  ServerRegistration,
+  errors::ProtocolError, keypair::Key, CredentialFinalization,
+  CredentialRequest, RegistrationRequest as PakeRegistrationRequest,
+  RegistrationUpload, ServerLogin, ServerLoginFinishResult,
+  ServerLoginStartParameters, ServerLoginStartResult, ServerRegistration,
 };
 use rand::{CryptoRng, Rng};
 use std::pin::Pin;
@@ -132,6 +132,18 @@ impl MyIdentityService {
       )
       .map_err(Error::Pake),
     }
+  }
+
+  async fn pake_login_finish(
+    &self,
+    pake_credential_finalization: &Vec<u8>,
+    server_login: ServerLogin<Cipher>,
+  ) -> Result<ServerLoginFinishResult<Cipher>, Error> {
+    server_login
+      .finish(CredentialFinalization::deserialize(
+        pake_credential_finalization,
+      )?)
+      .map_err(Error::Pake)
   }
 }
 
