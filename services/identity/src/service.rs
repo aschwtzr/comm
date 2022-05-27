@@ -1,14 +1,19 @@
 use futures_core::Stream;
 use opaque_ke::{
   errors::ProtocolError, keypair::Key,
-  RegistrationRequest as PakeRegistrationRequest, ServerRegistration,
+  RegistrationRequest as PakeRegistrationRequest, RegistrationUpload,
+  ServerRegistration,
 };
 use rand::{CryptoRng, Rng};
 use std::pin::Pin;
 use tokio::sync::mpsc::{error::SendError, Sender};
 use tonic::{Request, Response, Status};
 
-use crate::{config::Config, database::DatabaseClient, opaque::Cipher};
+use crate::{
+  config::Config,
+  database::{DatabaseClient, Error as DatabaseError},
+  opaque::Cipher,
+};
 
 pub use proto::identity_service_server::IdentityServiceServer;
 use proto::{
@@ -64,26 +69,46 @@ impl IdentityService for MyIdentityService {
   }
 }
 
-async fn pake_registration_start(
-  pake_registration_request: Vec<u8>,
-  rng: &mut (impl Rng + CryptoRng),
-  server_secret_key: &Key,
-  tx: Sender<Result<RegistrationResponse, Status>>,
-) -> Result<(), Error> {
-  let server_registration_start_result = ServerRegistration::<Cipher>::start(
-    rng,
-    PakeRegistrationRequest::deserialize(&pake_registration_request)?,
-    &server_secret_key,
-  )
-  .map_err(Error::Pake)?;
-  tx.send(Ok(RegistrationResponse {
-    data: Some(PakeRegistrationResponse(
-      server_registration_start_result.message.serialize(),
-    )),
-  }))
-  .await
-  .map_err(Error::Channel)?;
-  Ok(())
+impl MyIdentityService {
+  async fn pake_registration_start(
+    pake_registration_request: &Vec<u8>,
+    rng: &mut (impl Rng + CryptoRng),
+    server_secret_key: &Key,
+    tx: Sender<Result<RegistrationResponse, Status>>,
+  ) -> Result<(), Error> {
+    let server_registration_start_result = ServerRegistration::<Cipher>::start(
+      rng,
+      PakeRegistrationRequest::deserialize(pake_registration_request)?,
+      &server_secret_key,
+    )
+    .map_err(Error::Pake)?;
+    tx.send(Ok(RegistrationResponse {
+      data: Some(PakeRegistrationResponse(
+        server_registration_start_result.message.serialize(),
+      )),
+    }))
+    .await
+    .map_err(Error::Channel)?;
+    Ok(())
+  }
+
+  async fn pake_registration_finish(
+    &self,
+    user_id: String,
+    pake_registration_upload: &Vec<u8>,
+    server_registration: ServerRegistration<Cipher>,
+    rng: &mut (impl Rng + CryptoRng),
+  ) -> Result<(), Error> {
+    let server_registration_finish_result = server_registration.finish(
+      RegistrationUpload::<Cipher>::deserialize(pake_registration_upload)?,
+    )?;
+    self
+      .client
+      .put_pake_registration(user_id, server_registration_finish_result)
+      .await
+      .map_err(Error::Database)?;
+    Ok(())
+  }
 }
 
 #[derive(
@@ -94,4 +119,6 @@ pub enum Error {
   Pake(ProtocolError),
   #[display(...)]
   Channel(SendError<Result<RegistrationResponse, Status>>),
+  #[display(...)]
+  Database(DatabaseError),
 }
