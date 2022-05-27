@@ -1,7 +1,8 @@
 use futures_core::Stream;
 use opaque_ke::{
-  errors::ProtocolError, keypair::Key,
+  errors::ProtocolError, keypair::Key, CredentialRequest,
   RegistrationRequest as PakeRegistrationRequest, RegistrationUpload,
+  ServerLogin, ServerLoginStartParameters, ServerLoginStartResult,
   ServerRegistration,
 };
 use rand::{CryptoRng, Rng};
@@ -109,6 +110,29 @@ impl MyIdentityService {
       .map_err(Error::Database)?;
     Ok(())
   }
+
+  async fn pake_login_start(
+    &self,
+    user_id: String,
+    pake_credential_request: &Vec<u8>,
+    rng: &mut (impl Rng + CryptoRng),
+  ) -> Result<ServerLoginStartResult<Cipher>, Error> {
+    let server_registration =
+      self.client.get_pake_registration(user_id).await?;
+    let pake_credential_request =
+      CredentialRequest::deserialize(pake_credential_request)?;
+    match server_registration {
+      None => Err(Error::MissingRegistration),
+      Some(registration) => ServerLogin::start(
+        rng,
+        registration,
+        &self.config.server_secret_key,
+        pake_credential_request,
+        ServerLoginStartParameters::default(),
+      )
+      .map_err(Error::Pake),
+    }
+  }
 }
 
 #[derive(
@@ -121,4 +145,6 @@ pub enum Error {
   Channel(SendError<Result<RegistrationResponse, Status>>),
   #[display(...)]
   Database(DatabaseError),
+  #[display(...)]
+  MissingRegistration,
 }
