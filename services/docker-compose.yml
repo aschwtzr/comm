@@ -10,6 +10,8 @@ services:
     depends_on:
       - localstack
       - rabbitmq
+    networks:
+      - services-net
     build:
       dockerfile: services/tunnelbroker/Dockerfile
       context: ../
