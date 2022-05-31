@@ -70,6 +70,20 @@ services:
     image: commapp/identity-server:0.1
     ports:
       - "${COMM_SERVICES_PORT_IDENTITY}:50051"
+  # commtest
+  commtest-server:
+    depends_on:
+      - localstack
+    networks:
+      - services-net
+    build:
+      dockerfile: services/commtest/Dockerfile
+      context: ../
+      args:
+        - COMM_TEST_TARGET=${COMM_TEST_TARGET}
+    image: commapp/commtest-server:0.1
+    ports:
+      - "${COMM_SERVICES_PORT_COMMTEST}:50051"
   # localstack
   localstack:
     image: localstack/localstack
