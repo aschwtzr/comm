@@ -3,8 +3,11 @@
 import fs from 'fs';
 import type { QueryResults } from 'mysql';
 
+import { isDev } from 'lib/utils/dev-utils';
 import { getMessageForException } from 'lib/utils/errors';
+import sleep from 'lib/utils/sleep';
 
+import { updateRolesAndPermissionsForAllThreads } from '../updaters/thread-permission-updaters';
 import { dbQuery, SQL } from './database';
 
 async function makeSureBaseRoutePathExists(filePath: string): Promise<void> {
@@ -85,6 +88,7 @@ const migrations: $ReadOnlyMap<number, () => Promise<void>> = new Map([
       await fixBaseRoutePathForLocalhost('facts/squadcal_url.json');
     },
   ],
+  [3, updateRolesAndPermissionsForAllThreads],
 ]);
 
 async function migrate(): Promise<boolean> {
@@ -96,6 +100,12 @@ async function migrate(): Promise<boolean> {
     const dbVersionExceptionMessage = String(getMessageForException(e));
     console.error(`(node:${process.pid}) ${dbVersionExceptionMessage}`);
     return false;
+  }
+
+  // Delay to avoid executing migration before nodemon restarts server
+  // while transpiling files during dev environment startup.
+  if (isDev) {
+    await sleep(5000);
   }
 
   for (const [idx, migration] of migrations.entries()) {
