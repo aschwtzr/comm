@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use futures_core::Stream;
 use opaque_ke::{
   errors::ProtocolError, CredentialFinalization, CredentialRequest,
@@ -6,9 +7,10 @@ use opaque_ke::{
   ServerLoginStartResult, ServerRegistration,
 };
 use rand::{CryptoRng, Rng};
+use siwe::{Message, ParseError, VerificationError};
 use std::pin::Pin;
 use tokio::sync::mpsc::{error::SendError, Sender};
-use tonic::{Request, Response, Status};
+use tonic::{codegen::http::uri::Authority, Request, Response, Status};
 
 use crate::{
   config::Config,
@@ -144,6 +146,19 @@ impl MyIdentityService {
       )?)
       .map_err(Error::Pake)
   }
+
+  fn wallet_login(
+    &self,
+    message: String,
+    signature: [u8; 65],
+    domain: Option<&Authority>,
+    nonce: Option<&str>,
+    timestamp: Option<&DateTime<Utc>>,
+  ) -> Result<(), Error> {
+    let message: Message = message.parse()?;
+    message.verify(signature, domain, nonce, timestamp)?;
+    Ok(())
+  }
 }
 
 #[derive(
@@ -158,4 +173,8 @@ pub enum Error {
   Database(DatabaseError),
   #[display(...)]
   MissingRegistration,
+  #[display(...)]
+  WalletSignature(VerificationError),
+  #[display(...)]
+  WalletMessage(ParseError),
 }
