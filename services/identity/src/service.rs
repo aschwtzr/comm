@@ -1,9 +1,11 @@
 use futures_core::Stream;
+use rusoto_core::RusotoError;
+use rusoto_dynamodb::GetItemError;
 use std::pin::Pin;
 use tonic::{Request, Response, Status};
 
-use crate::config::Config;
 use crate::database::DatabaseClient;
+use crate::{config::Config, database::Error};
 
 pub use proto::identity_service_server::IdentityServiceServer;
 use proto::{
@@ -53,7 +55,41 @@ impl IdentityService for MyIdentityService {
     &self,
     request: Request<VerifyUserTokenRequest>,
   ) -> Result<Response<VerifyUserTokenResponse>, Status> {
-    println!("Got a lookup request: {:?}", request);
-    unimplemented!()
+    let message = request.into_inner();
+    let token_valid = match self
+      .client
+      .get_token(message.user_id, message.device_id)
+      .await
+    {
+      Ok(Some(access_token)) => access_token.token == message.token,
+      Ok(None) => false,
+      Err(Error::RusotoGet(RusotoError::Service(
+        GetItemError::ResourceNotFound(e),
+      ))) => {
+        return Err(Status::failed_precondition(format!(
+          "Database table or index not found: {}",
+          e
+        )))
+      }
+      Err(Error::RusotoGet(RusotoError::Credentials(e))) => {
+        return Err(Status::failed_precondition(format!(
+          "AWS credentials misconfigured: {}",
+          e
+        )))
+      }
+      Err(Error::RusotoGet(e)) => {
+        return Err(Status::unavailable(format!(
+          "Failed to retrieve item from database: {}",
+          e
+        )))
+      }
+      Err(e) => {
+        return Err(Status::failed_precondition(format!(
+          "Encountered an unexpected error: {}",
+          e
+        )))
+      }
+    };
+    Ok(Response::new(VerifyUserTokenResponse { token_valid }))
   }
 }
