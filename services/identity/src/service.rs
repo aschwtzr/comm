@@ -67,8 +67,27 @@ impl IdentityService for MyIdentityService {
     &self,
     request: Request<VerifyUserTokenRequest>,
   ) -> Result<Response<VerifyUserTokenResponse>, Status> {
-    println!("Got a lookup request: {:?}", request);
-    unimplemented!()
+    let message = request.into_inner();
+    match self
+      .client
+      .get_token(message.user_id, message.device_id)
+      .await
+    {
+      Ok(Some(access_token)) => {
+        if message.token == access_token.token {
+          Ok(Response::new(VerifyUserTokenResponse {
+            token_valid: access_token.valid,
+          }))
+        } else {
+          Ok(Response::new(VerifyUserTokenResponse {
+            token_valid: false,
+          }))
+        }
+      }
+      _ => Ok(Response::new(VerifyUserTokenResponse {
+        token_valid: false,
+      })),
+    }
   }
 }
 
