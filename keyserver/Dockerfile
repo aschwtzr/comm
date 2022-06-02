@@ -5,9 +5,15 @@ FROM node:16.13-bullseye
 # Install prereqs first so we don't have to reinstall them if anything changes
 #-------------------------------------------------------------------------------
 
-# We use rsync in the prod-build yarn script
+# We add Debian's unstable repo since it's the only way to get mysqldump
+RUN echo "deb http://deb.debian.org/debian unstable main non-free contrib" \
+  >> /etc/apt/sources.list
+
+# We need rsync in the prod-build yarn script
+# We need mysql-client so we can use mysqldump for backups
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   rsync \
+  mysql-client \
   && rm -rf /var/lib/apt/lists/*
 
 #-------------------------------------------------------------------------------
@@ -18,6 +24,19 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN useradd -m comm
 USER comm
 WORKDIR /home/comm/app
+
+#-------------------------------------------------------------------------------
+# STEP 2: SET UP MYSQL BACKUPS
+# Prepare the system to properly handle mysqldump backups
+#-------------------------------------------------------------------------------
+
+# Prepare the directory that will hold the backups
+RUN mkdir /home/comm/mysqldump
+
+# We install mysql-client 8.0 above but use it with MySQL 5.7. Unfortunately,
+# we haven't been able to figure out a way to install mysql-client 5.7 on
+# Debian bullseye. Instead, we configure mysqldump 8.0 to work with MySQL 5.7
+RUN echo "[mysqldump]\ncolumn-statistics=0" > /home/comm/.my.cnf
 
 #-------------------------------------------------------------------------------
 # STEP 2: INSTALL NVM
