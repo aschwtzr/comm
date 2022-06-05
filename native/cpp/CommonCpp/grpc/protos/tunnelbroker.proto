@@ -20,6 +20,7 @@ service TunnelbrokerService {
   rpc NewSession(NewSessionRequest) returns (NewSessionResponse) {}
   rpc Send(SendRequest) returns (google.protobuf.Empty) {}
   rpc Get(GetRequest) returns (stream GetResponse) {}
+  rpc ConfirmCheckpoint(ConfirmCheckpointRequest) returns (google.protobuf.Empty) {}
 
   // Replacing Send and Get with a single bidirectional streaming RPC
   rpc OpenStream(stream OutboundMessage) returns (stream InboundMessage) {}
@@ -74,6 +75,11 @@ message GetResponse {
   string fromDeviceID = 1;
   bytes payload = 2;
   repeated string blobHashes = 3;
+}
+
+message ConfirmCheckpointRequest {
+  string sessionID = 1;
+  string checkpointTime = 2;
 }
 
 message OutboundMessage {
