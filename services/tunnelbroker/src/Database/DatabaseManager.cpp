@@ -209,6 +209,18 @@ void DatabaseManager::removeMessageItem(const std::string &messageID) {
   this->innerRemoveItem(*item);
 }
 
+void DatabaseManager::removeMessageItemsOlderThenDeviceCheckpoint(
+    const std::string &toDeviceID,
+    const size_t &checkpointTime) {
+  std::vector<std::shared_ptr<MessageItem>> messageItems =
+      this->findMessageItemsByReceiver(toDeviceID);
+  for (std::shared_ptr<MessageItem> &messageItem : messageItems) {
+    if (messageItem->getCreatedAt() < checkpointTime) {
+      this->removeMessageItem(messageItem->getMessageID());
+    }
+  }
+}
+
 } // namespace database
 } // namespace network
 } // namespace comm
