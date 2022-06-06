@@ -15,6 +15,8 @@
 #include <aws/dynamodb/model/GetItemRequest.h>
 #include <aws/dynamodb/model/PutItemRequest.h>
 #include <aws/dynamodb/model/QueryRequest.h>
+#include <aws/dynamodb/model/UpdateItemRequest.h>
+#include <aws/dynamodb/model/UpdateItemResult.h>
 
 #include <memory>
 #include <string>
@@ -32,6 +34,9 @@ public:
   std::shared_ptr<DeviceSessionItem>
   findSessionItem(const std::string &deviceID);
   void removeSessionItem(const std::string &sessionID);
+  void updateSessionItemCheckpointTime(
+      const std::string &sessionID,
+      const size_t &checkpointTime);
 
   void putSessionSignItem(const SessionSignItem &item);
   std::shared_ptr<SessionSignItem>
