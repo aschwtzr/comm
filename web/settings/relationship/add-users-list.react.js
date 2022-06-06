@@ -9,6 +9,8 @@ import type { GlobalAccountUserInfo } from 'lib/types/user-types.js';
 import { useServerCall } from 'lib/utils/action-utils.js';
 
 import { useSelector } from '../../redux/redux-utils.js';
+import AddUsersListItem from './add-users-list-item.react.js';
+import css from './add-users-list.css';
 
 type Props = {
   +searchText: string,
@@ -70,7 +72,6 @@ function AddUsersList(props: Props): React.Node {
     userStoreSearchResults,
   ]);
 
-  // eslint-disable-next-line no-unused-vars
   const sortedUsers = React.useMemo(() => {
     const users = [];
     for (const userID in mergedUserInfos) {
@@ -81,7 +82,18 @@ function AddUsersList(props: Props): React.Node {
       .sort((user1, user2) => user1.username.localeCompare(user2.username));
   }, [excludedStatuses, mergedUserInfos]);
 
-  return null;
+  const userRows = React.useMemo(
+    () =>
+      sortedUsers.map(userInfo => (
+        <AddUsersListItem
+          userInfo={userInfo}
+          key={userInfo.id}
+          selectUser={() => {}}
+        />
+      )),
+    [sortedUsers],
+  );
+  return <div className={css.container}>{userRows}</div>;
 }
 
 export default AddUsersList;
