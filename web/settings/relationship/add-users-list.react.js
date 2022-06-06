@@ -82,16 +82,54 @@ function AddUsersList(props: Props): React.Node {
       .sort((user1, user2) => user1.username.localeCompare(user2.username));
   }, [excludedStatuses, mergedUserInfos]);
 
+  const [pendingUsersToAdd, setPendingUsersToAdd] = React.useState<
+    $ReadOnlyArray<GlobalAccountUserInfo>,
+  >([]);
+  const selectUser = React.useCallback(
+    (userID: string) => {
+      setPendingUsersToAdd(pendingUsers => {
+        const username = mergedUserInfos[userID]?.username;
+        if (!username) {
+          return pendingUsers;
+        }
+
+        for (const pendingUser of pendingUsers) {
+          if (pendingUser.id === userID) {
+            return pendingUsers;
+          }
+        }
+
+        return [
+          ...pendingUsers,
+          {
+            id: userID,
+            username,
+          },
+        ].sort((user1, user2) => user1.username.localeCompare(user2.username));
+      });
+    },
+    [mergedUserInfos],
+  );
+  const pendingUserIDs = React.useMemo(
+    () => new Set(pendingUsersToAdd.map(userInfo => userInfo.id)),
+    [pendingUsersToAdd],
+  );
+
+  const filteredUsers = React.useMemo(
+    () => sortedUsers.filter(userInfo => !pendingUserIDs.has(userInfo.id)),
+    [pendingUserIDs, sortedUsers],
+  );
+
   const userRows = React.useMemo(
     () =>
-      sortedUsers.map(userInfo => (
+      filteredUsers.map(userInfo => (
         <AddUsersListItem
           userInfo={userInfo}
           key={userInfo.id}
-          selectUser={() => {}}
+          selectUser={selectUser}
         />
       )),
-    [sortedUsers],
+    [filteredUsers, selectUser],
   );
   return <div className={css.container}>{userRows}</div>;
 }
