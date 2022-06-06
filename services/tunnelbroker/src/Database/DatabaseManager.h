@@ -47,6 +47,9 @@ public:
   std::vector<std::shared_ptr<MessageItem>>
   findMessageItemsByReceiver(const std::string &toDeviceID);
   void removeMessageItem(const std::string &messageID);
+  void removeMessageItemsOlderThenDeviceCheckpoint(
+      const std::string &toDeviceID,
+      const uint64_t &checkpointTime);
 };
 
 } // namespace database
