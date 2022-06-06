@@ -2,6 +2,8 @@
 #include "DynamoDBTools.h"
 #include "GlobalTools.h"
 
+#include <glog/logging.h>
+
 namespace comm {
 namespace network {
 namespace database {
@@ -71,6 +73,41 @@ void DatabaseManager::removeSessionItem(const std::string &sessionID) {
     return;
   }
   this->innerRemoveItem(*item);
+}
+
+void DatabaseManager::updateSessionItemCheckpointTime(
+    const std::string &sessionID,
+    const size_t &checkpointTime) {
+  std::shared_ptr<DeviceSessionItem> item = this->findSessionItem(sessionID);
+  if (item == nullptr) {
+    LOG(ERROR) << "Can't find for update sessionItem for sessionID: "
+               << sessionID;
+  }
+  Aws::DynamoDB::Model::UpdateItemRequest request;
+  request.SetTableName(item->getTableName());
+
+  Aws::DynamoDB::Model::AttributeValue attributeKeyValue;
+  attributeKeyValue.SetS(sessionID);
+  request.AddKey(DeviceSessionItem::FIELD_SESSION_ID, attributeKeyValue);
+  Aws::String update_expression("SET #a = :valueA");
+  request.SetUpdateExpression(update_expression);
+  Aws::Map<Aws::String, Aws::String> expressionAttributeNames;
+  expressionAttributeNames["#a"] = DeviceSessionItem::FIELD_CHECKPOINT_TIME;
+  request.SetExpressionAttributeNames(expressionAttributeNames);
+
+  Aws::DynamoDB::Model::AttributeValue attributeUpdatedValue;
+  attributeUpdatedValue.SetS(std::to_string(checkpointTime));
+  Aws::Map<Aws::String, Aws::DynamoDB::Model::AttributeValue>
+      expressionAttributeValue;
+  expressionAttributeValue[":valueA"] = attributeUpdatedValue;
+  request.SetExpressionAttributeValues(expressionAttributeValue);
+
+  const Aws::DynamoDB::Model::UpdateItemOutcome &result =
+      getDynamoDBClient()->UpdateItem(request);
+  if (!result.IsSuccess()) {
+    LOG(ERROR) << "Error updating checkpoint time at SessionItem: "
+               << result.GetError().GetMessage();
+  }
 }
 
 void DatabaseManager::putSessionSignItem(const SessionSignItem &item) {
