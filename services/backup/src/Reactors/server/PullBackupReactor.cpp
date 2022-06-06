@@ -137,7 +137,8 @@ PullBackupReactor::writeResponse(backup::PullBackupResponse *response) {
 }
 
 void PullBackupReactor::terminateCallback() {
-  if (!this->getReactor->getStatusHolder()->getStatus().ok()) {
+  if (this->getReactor != nullptr &&
+      !this->getReactor->getStatusHolder()->getStatus().ok()) {
     throw std::runtime_error(
         this->getReactor->getStatusHolder()->getStatus().error_message());
   }
