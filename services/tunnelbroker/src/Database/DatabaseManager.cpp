@@ -209,6 +209,29 @@ void DatabaseManager::removeMessageItem(const std::string &messageID) {
   this->innerRemoveItem(*item);
 }
 
+void DatabaseManager::removeMessageItemsOlderThenDeviceCheckpoint(
+    const std::string &toDeviceID,
+    const size_t &checkpointTime) {
+  std::vector<std::shared_ptr<MessageItem>> messageItems =
+      this->findMessageItemsByReceiver(toDeviceID);
+  std::vector<Aws::DynamoDB::Model::WriteRequest> writeRequests;
+
+  for (std::shared_ptr<MessageItem> &messageItem : messageItems) {
+    if (messageItem->getCreatedAt() <= checkpointTime) {
+      Aws::DynamoDB::Model::DeleteRequest deleteRequest;
+      PrimaryKeyDescriptor pk = messageItem->getPrimaryKeyDescriptor();
+      PrimaryKeyValue primaryKeyValue = messageItem->getPrimaryKeyValue();
+      deleteRequest.AddKey(
+          pk.partitionKey,
+          Aws::DynamoDB::Model::AttributeValue(primaryKeyValue.partitionKey));
+      Aws::DynamoDB::Model::WriteRequest curWriteRequest;
+      curWriteRequest.SetDeleteRequest(deleteRequest);
+      writeRequests.push_back(curWriteRequest);
+    }
+  }
+  this->innerBatchWriteItem(MESSAGES_TABLE_NAME, writeRequests);
+}
+
 } // namespace database
 } // namespace network
 } // namespace comm
