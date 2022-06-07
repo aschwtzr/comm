@@ -37,6 +37,7 @@ class PullBackupReactor : public ServerWriteReactorBase<
   std::vector<std::shared_ptr<database::LogItem>> logs;
   size_t currentLogIndex = 0;
   std::shared_ptr<database::LogItem> currentLog;
+  size_t currentChunkCounter = 0;
 
   void initializeGetReactor(const std::string &holder);
 
