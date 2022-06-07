@@ -6,6 +6,7 @@ pub mod proto {
 
 pub mod backup_utils;
 mod create_new_backup;
+mod pull_backup;
 mod send_log;
 pub mod tools;
 
@@ -29,8 +30,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       vec![100],
       vec![ByteSize::kb(400).as_u64() as usize],
       vec![
-        ByteSize::kb(500).as_u64() as usize,
-        ByteSize::kb(100).as_u64() as usize,
+        ByteSize::mb(4).as_u64() as usize,
+        ByteSize::mb(4).as_u64() as usize,
       ],
     ],
   };
@@ -44,6 +45,51 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     send_log::run(&mut client, &backup_data, log_index)
       .await
       .map_err(|err| -> String { format!("send log: {}", err) })?;
+  }
+
+  let result = pull_backup::run(&mut client, &backup_data)
+    .await
+    .map_err(|err| -> String { format!("pull backup: {}", err) })?;
+
+  // check backup size
+  let expected: usize = backup_data.backup_chunk_sizes.iter().sum();
+  let from_result: usize = result.backup_chunk_sizes.iter().sum();
+  if from_result != expected {
+    return Err(
+      format!(
+        "backup sizes do not match, expected {}, got {}",
+        expected, from_result
+      )
+      .into(),
+    );
+  }
+
+  // check number of logs
+  let expected: usize = backup_data.logs_sizes.len();
+  let from_result: usize = result.logs_sizes.len();
+  if expected != from_result {
+    return Err(
+      format!(
+        "number of logs do not match, expected {}, got {}",
+        expected, from_result
+      )
+      .into(),
+    );
+  }
+
+  // check log sizes
+  for i in 0..backup_data.logs_sizes.len() {
+    let expected: usize = backup_data.logs_sizes[i].iter().sum();
+    let from_result: usize = result.logs_sizes[i].iter().sum();
+    if from_result != expected {
+      return Err(
+        format!(
+          "log number {} sizes do not match, expected {}, got {}",
+          i, expected, from_result
+        )
+        .into(),
+      );
+    }
   }
 
   println!("tested");
