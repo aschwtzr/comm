@@ -4,9 +4,13 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import app.comm.android.fbjni.CommSecureStore;
 import app.comm.android.fbjni.NetworkModule;
+import app.comm.android.fbjni.ThreadOperations;
 import com.google.firebase.messaging.RemoteMessage;
+import expo.modules.securestore.SecureStoreModule;
 import io.invertase.firebase.messaging.RNFirebaseMessagingService;
+import java.io.File;
 import me.leolin.shortcutbadger.ShortcutBadger;
 
 /**
@@ -40,11 +44,15 @@ public class CommNotificationsHandler extends RNFirebaseMessagingService {
   private static final String BADGE_KEY = "badge";
   private static final String BADGE_ONLY_KEY = "badgeOnly";
   private static final String BACKGROUND_NOTIF_TYPE_KEY = "backgroundNotifType";
+  private static final String THREAD_ID_KEY = "threadID";
+  private static final String SET_UNREAD_STATUS_KEY = "setUnreadStatus";
   private NotificationManager notificationManager;
 
   @Override
   public void onCreate() {
     super.onCreate();
+    CommSecureStore.getInstance().initialize(
+        new SecureStoreModule(this.getApplicationContext()));
     notificationManager = (NotificationManager)this.getSystemService(
         Context.NOTIFICATION_SERVICE);
   }
@@ -55,13 +63,7 @@ public class CommNotificationsHandler extends RNFirebaseMessagingService {
     String rescindID = message.getData().get(RESCIND_ID_KEY);
     if ("true".equals(rescind) &&
         android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-      for (StatusBarNotification notification :
-           notificationManager.getActiveNotifications()) {
-        if (notification.getTag().equals(rescindID)) {
-          notificationManager.cancel(
-              notification.getTag(), notification.getId());
-        }
-      }
+      handleNotificationRescind(message);
     }
 
     String badge = message.getData().get(BADGE_KEY);
@@ -91,5 +93,28 @@ public class CommNotificationsHandler extends RNFirebaseMessagingService {
     }
 
     super.onMessageReceived(message);
+  }
+
+  private void handleNotificationRescind(RemoteMessage message) {
+    String setUnreadStatus = message.getData().get(SET_UNREAD_STATUS_KEY);
+    if ("true".equals(setUnreadStatus)) {
+      File sqliteFile =
+          this.getApplicationContext().getDatabasePath("comm.sqlite");
+      if (sqliteFile.exists()) {
+        String threadID = message.getData().get(THREAD_ID_KEY);
+        ThreadOperations.updateSQLiteUnreadStatus(
+            sqliteFile.getPath(), threadID, false);
+      } else {
+        Log.w(
+            "COMM",
+            "Database not existing yet. Skipping thread status update.");
+      }
+    }
+    for (StatusBarNotification notification :
+         notificationManager.getActiveNotifications()) {
+      if (notification.getTag().equals(rescindID)) {
+        notificationManager.cancel(notification.getTag(), notification.getId());
+      }
+    }
   }
 }
