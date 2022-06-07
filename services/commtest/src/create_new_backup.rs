@@ -11,7 +11,7 @@ use crate::backup_utils::BackupData;
 
 pub async fn run(
   client: &mut BackupServiceClient<tonic::transport::Channel>,
-  backup_data: &BackupData
+  backup_data: &BackupData,
 ) -> Result<String, Box<dyn std::error::Error>> {
   println!("create new backup");
   let cloned_user_id = backup_data.user_id.clone();
