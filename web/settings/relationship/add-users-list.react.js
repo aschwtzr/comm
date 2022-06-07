@@ -8,6 +8,7 @@ import type { UserRelationshipStatus } from 'lib/types/relationship-types.js';
 import type { GlobalAccountUserInfo } from 'lib/types/user-types.js';
 import { useServerCall } from 'lib/utils/action-utils.js';
 
+import Label from '../../components/label.react.js';
 import { useSelector } from '../../redux/redux-utils.js';
 import AddUsersListItem from './add-users-list-item.react.js';
 import css from './add-users-list.css';
@@ -110,10 +111,35 @@ function AddUsersList(props: Props): React.Node {
     },
     [mergedUserInfos],
   );
+  const deselectUser = React.useCallback(
+    (userID: string) =>
+      setPendingUsersToAdd(pendingUsers => {
+        const filteredPendingUsers = pendingUsers.filter(
+          userInfo => userInfo.id !== userID,
+        );
+        if (filteredPendingUsers.length !== pendingUsers.length) {
+          return filteredPendingUsers;
+        }
+        return pendingUsers;
+      }),
+    [],
+  );
   const pendingUserIDs = React.useMemo(
     () => new Set(pendingUsersToAdd.map(userInfo => userInfo.id)),
     [pendingUsersToAdd],
   );
+
+  const userTags = React.useMemo(() => {
+    const tags = pendingUsersToAdd.map(userInfo => (
+      <Label key={userInfo.id} onClose={() => deselectUser(userInfo.id)}>
+        {userInfo.username}
+      </Label>
+    ));
+    if (tags.length > 0) {
+      return <div className={css.userTagsContainer}>{tags}</div>;
+    }
+    return null;
+  }, [deselectUser, pendingUsersToAdd]);
 
   const filteredUsers = React.useMemo(
     () => sortedUsers.filter(userInfo => !pendingUserIDs.has(userInfo.id)),
@@ -131,7 +157,12 @@ function AddUsersList(props: Props): React.Node {
       )),
     [filteredUsers, selectUser],
   );
-  return <div className={css.container}>{userRows}</div>;
+  return (
+    <div className={css.container}>
+      {userTags}
+      <div className={css.userRowsContainer}>{userRows}</div>
+    </div>
+  );
 }
 
 export default AddUsersList;
