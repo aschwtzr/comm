@@ -4,13 +4,13 @@ use crate::backup_utils::{
 
 use tonic::Request;
 
-use crate::tools::generate_nbytes;
 use crate::backup_utils::BackupData;
+use crate::tools::generate_nbytes;
 
 pub async fn run(
   client: &mut BackupServiceClient<tonic::transport::Channel>,
   backup_data: &BackupData,
-  log_index: usize
+  log_index: usize,
 ) -> Result<String, Box<dyn std::error::Error>> {
   println!("send log");
   let cloned_user_id = backup_data.user_id.clone();
