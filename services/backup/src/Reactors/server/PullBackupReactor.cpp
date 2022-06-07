@@ -60,6 +60,7 @@ PullBackupReactor::writeResponse(backup::PullBackupResponse *response) {
     std::string dataChunk;
     this->dataChunks->blockingRead(dataChunk);
     if (!dataChunk.empty()) {
+      response->set_chunkcounter(this->currentChunkCounter++);
       response->set_compactionchunk(dataChunk);
       return nullptr;
     }
@@ -72,6 +73,7 @@ PullBackupReactor::writeResponse(backup::PullBackupResponse *response) {
           this->getReactor->getStatusHolder()->getStatus().error_message());
     }
     this->state = State::LOGS;
+    this->currentChunkCounter = 0;
   }
   if (this->state == State::LOGS) {
     // TODO make sure logs are received in correct order regardless their size
@@ -108,7 +110,9 @@ PullBackupReactor::writeResponse(backup::PullBackupResponse *response) {
         // data to the client and reset currentLog so the next invocation of
         // writeResponse will take another one from the collection
         response->set_logchunk(this->currentLog->getValue());
+        response->set_chunkcounter(this->currentChunkCounter);
         ++this->currentLogIndex;
+        this->currentChunkCounter = 0;
         this->currentLog = nullptr;
         return nullptr;
       }
@@ -126,10 +130,12 @@ PullBackupReactor::writeResponse(backup::PullBackupResponse *response) {
     //  If there's data inside, we write it to the client and proceed.
     if (dataChunk.empty()) {
       ++this->currentLogIndex;
+      this->currentChunkCounter = 0;
       this->currentLog = nullptr;
       return nullptr;
     } else {
       response->set_logchunk(dataChunk);
+      response->set_chunkcounter(this->currentChunkCounter++);
     }
     return nullptr;
   }
