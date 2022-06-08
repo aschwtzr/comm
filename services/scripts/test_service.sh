@@ -15,5 +15,5 @@ export COMM_TEST_SERVICES=1
 
 echo "${SERVICE} service will be tested"
 
-docker-compose build ${SERVICE}-server
-docker-compose run ${SERVICE}-server
+docker compose build ${SERVICE}-server
+docker compose run ${SERVICE}-server

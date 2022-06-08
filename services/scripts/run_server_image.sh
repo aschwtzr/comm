@@ -29,5 +29,5 @@ else
   exit 1
 fi
 
-docker-compose build $SERVICE-server
-docker-compose up $SERVICE-server
+docker compose build $SERVICE-server
+docker compose up $SERVICE-server

@@ -8,4 +8,4 @@ for SERVICE in $SERVICES_LIST; do
   SERVICES="$SERVICES $SERVICE-server"
 done
 
-docker-compose up $SERVICES
+docker compose up $SERVICES
