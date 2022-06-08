@@ -4,10 +4,11 @@ import expo.modules.core.Promise;
 import expo.modules.core.arguments.MapArguments;
 import expo.modules.core.arguments.ReadableArguments;
 import expo.modules.securestore.SecureStoreModule;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 public class CommSecureStore {
 
   private static final CommSecureStore instance = new CommSecureStore();
+  private static AtomicBoolean initialized = new AtomicBoolean(false);
   private SecureStoreModule secureStoreModule = null;
   private final ReadableArguments readableArguments;
 
@@ -20,7 +21,9 @@ public class CommSecureStore {
   }
 
   public void initialize(SecureStoreModule secureStoreModule) {
-    this.secureStoreModule = secureStoreModule;
+    if (CommSecureStore.initialized.compareAndSet(false, true)) {
+      this.secureStoreModule = secureStoreModule;
+    }
   }
 
   private void checkModule() {
