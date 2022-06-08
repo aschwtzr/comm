@@ -20,7 +20,13 @@ public class CommSecureStore {
   }
 
   public void initialize(SecureStoreModule secureStoreModule) {
-    this.secureStoreModule = secureStoreModule;
+    if (this.secureStoreModule == null) {
+      synchronized (this) {
+        if (this.secureStoreModule == null) {
+          this.secureStoreModule = secureStoreModule;
+        }
+      }
+    }
   }
 
   private void checkModule() {
