@@ -1,0 +1,70 @@
+div.threadSearchContainer {
+  background-color: #212121;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  max-height: 50%;
+  overflow: auto;
+  flex-shrink: 0;
+}
+div.fullHeight {
+  height: 100%;
+}
+
+div.userSelectedTags {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  margin-bottom: 8px;
+}
+
+div.searchRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: 8px;
+}
+
+div.searchField {
+  flex-grow: 1;
+}
+
+div.closeSearch {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #808080;
+  margin: 0 8px;
+}
+
+ul.searchResultsContainer {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  padding: 0px 12px 8px 12px;
+}
+
+li.searchResultsItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+li.searchResultsItem:hover {
+  background-color: #3d3d3d;
+}
+
+div.userName {
+  color: white;
+}
+
+div.userInfo {
+  font-style: italic;
+  color: rgb(130, 130, 130);
+}
