@@ -17,6 +17,7 @@ import {
   threadFrozenDueToViewerBlock,
   threadActualMembers,
   checkIfDefaultMembersAreVoiced,
+  threadIsPending,
 } from 'lib/shared/thread-utils';
 import type { CalendarQuery } from 'lib/types/entry-types';
 import type { LoadingStatus } from 'lib/types/loading-types';
@@ -239,6 +240,9 @@ class ChatInputBar extends React.PureComponent<Props> {
       threadHasPermission(this.props.threadInfo, threadPermissions.VOICED) ||
       (this.props.threadCreationInProgress && defaultMembersAreVoiced)
     ) {
+      const placeholder = threadIsPending(this.props.threadInfo.id)
+        ? 'Type and send message to create the thread'
+        : 'Type your message';
       content = (
         <div className={css.inputBarWrapper}>
           <a className={css.multimediaUpload} onClick={this.onMultimediaClick}>
@@ -259,7 +263,7 @@ class ChatInputBar extends React.PureComponent<Props> {
           <div className={css.inputBarTextInput}>
             <textarea
               rows="1"
-              placeholder="Type your message"
+              placeholder={placeholder}
               value={this.props.inputState.draft}
               onChange={this.onChangeMessageText}
               onKeyDown={this.onKeyDown}
