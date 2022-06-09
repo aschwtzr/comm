@@ -1,8 +1,13 @@
 // @flow
 
 import { locallyUniqueToRealizedThreadIDsSelector } from 'lib/selectors/thread-selectors';
-import { threadIsPending } from 'lib/shared/thread-utils';
-import type { RawThreadInfo } from 'lib/types/thread-types';
+import {
+  createPendingThread,
+  parseLocallyUniqueThreadID,
+  threadIsPending,
+} from 'lib/shared/thread-utils';
+import { type RawThreadInfo, threadTypes } from 'lib/types/thread-types';
+import type { UserInfos } from 'lib/types/user-types';
 
 import type { Action } from '../redux/redux-setup';
 import { type NavInfo, updateNavInfoActionType } from '../types/nav-types';
@@ -11,6 +16,8 @@ export default function reduceNavInfo(
   oldState: NavInfo,
   action: Action,
   newThreadInfos: { +[id: string]: RawThreadInfo },
+  userID: ?string,
+  userInfos: UserInfos,
 ): NavInfo {
   let state = oldState;
   if (action.type === updateNavInfoActionType) {
@@ -20,7 +27,7 @@ export default function reduceNavInfo(
     };
   }
 
-  const { activeChatThreadID } = state;
+  const { activeChatThreadID, pendingThread } = state;
   if (activeChatThreadID) {
     const locallyUniqueToRealizedThreadIDs = locallyUniqueToRealizedThreadIDsSelector(
       newThreadInfos,
@@ -33,11 +40,36 @@ export default function reduceNavInfo(
         ...state,
         activeChatThreadID: realizedThreadID,
       };
+    } else if (threadIsPending(activeChatThreadID)) {
+      const pendingThreadData = parseLocallyUniqueThreadID(activeChatThreadID);
+      if (
+        pendingThreadData &&
+        pendingThreadData.threadType !== threadTypes.SIDEBAR &&
+        pendingThread?.id !== activeChatThreadID &&
+        userID
+      ) {
+        const members = pendingThreadData.memberIDs
+          .map(id => userInfos[id])
+          .filter(Boolean);
+        const newPendingThread = createPendingThread({
+          viewerID: userID,
+          threadType: pendingThreadData.threadType,
+          members,
+        });
+        state = {
+          ...state,
+          activeChatThreadID: newPendingThread.id,
+          pendingThread: newPendingThread,
+        };
+      }
     }
   }
 
   if (state.pendingThread && !threadIsPending(state.activeChatThreadID)) {
-    const { pendingThread, ...stateWithoutPendingThread } = state;
+    const {
+      pendingThread: currentPendingThread,
+      ...stateWithoutPendingThread
+    } = state;
     state = stateWithoutPendingThread;
   }
 
