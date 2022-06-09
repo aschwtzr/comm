@@ -14,6 +14,7 @@ import {
   threadInChatList,
   getThreadListSearchResults,
   useThreadListSearch,
+  threadIsPending,
 } from 'lib/shared/thread-utils';
 import { threadTypes } from 'lib/types/thread-types';
 
@@ -87,6 +88,22 @@ function ThreadListProvider(props: ThreadListProviderProps): React.Node {
     return activeTab;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTopLevelThreadIsInChatList, activeThreadID]);
+
+  const makeSureCurrentPendingThreadIsIncluded = React.useCallback(
+    (
+      threadListData: $ReadOnlyArray<ChatThreadItem>,
+    ): $ReadOnlyArray<ChatThreadItem> => {
+      if (
+        activeChatThreadItem &&
+        threadIsPending(activeThreadID) &&
+        activeThreadInfo?.type !== threadTypes.SIDEBAR
+      ) {
+        return [activeChatThreadItem, ...threadListData];
+      }
+      return threadListData;
+    },
+    [activeChatThreadItem, activeThreadID, activeThreadInfo?.type],
+  );
 
   const makeSureActiveSidebarIsIncluded = React.useCallback(
     (threadListData: $ReadOnlyArray<ChatThreadItem>) => {
@@ -185,13 +202,17 @@ function ThreadListProvider(props: ThreadListProviderProps): React.Node {
         ...threadListWithTopLevelItem,
       ];
     }
-    return makeSureActiveSidebarIsIncluded(threadListWithTopLevelItem);
+    const threadListWithCurrentPendingThread = makeSureCurrentPendingThreadIsIncluded(
+      threadListWithTopLevelItem,
+    );
+    return makeSureActiveSidebarIsIncluded(threadListWithCurrentPendingThread);
   }, [
     activeTab,
     activeThreadOriginalTab,
     activeTopLevelChatThreadItem,
     activeTopLevelThreadIsInChatList,
     chatListDataWithoutFilter,
+    makeSureCurrentPendingThreadIsIncluded,
     makeSureActiveSidebarIsIncluded,
   ]);
   const threadListContext = React.useMemo(
