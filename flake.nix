@@ -15,7 +15,7 @@
         localOverlay
       ];
 
-      # Since we build for many systems (e.g. m1 mac, x86_64-linux), we create
+      # Since we build for many systems (e.g. ARM-based Mac, x86_64-linux), we create
       # a helper function to help facilitate instantiation of the related package set
       pkgsForSystem = system: import nixpkgs {
         inherit overlays system;

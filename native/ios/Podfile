@@ -57,7 +57,7 @@ post_install do |installer|
   react_native_post_install(installer)
   __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
-  # Excluding arm64 because M1 simulator isn't supported yet
+  # Excluding arm64 because ARM-based Mac simulator isn't supported yet
   # Excluding 32-bit x86 because nobody uses it and it causes compilation issues
   installer.pods_project.build_configurations.each do |config|
     config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64 i386"
