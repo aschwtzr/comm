@@ -23,3 +23,6 @@ pub enum Error {
   #[display(...)]
   TonicStatus(tonic::Status),
 }
+
+#[allow(dead_code)]
+pub const ATTACHMENT_DELIMITER: char = ';';
