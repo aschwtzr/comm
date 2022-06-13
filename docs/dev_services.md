@@ -59,3 +59,35 @@ You can find the full list of scripts [here](https://github.com/CommE2E/comm/blo
 ## Visual Studio Code
 
 If you are using Visual Studio Code as your code editor you can [attach to a Docker container](https://code.visualstudio.com/docs/remote/attach-container) and develop inside it.
+
+## Services dev-mode
+
+To make the development and testing process easier, you can run services from your local dev environment using a [local cloud stack](https://localstack.cloud/) that includes DynamoDB and S3.
+
+Tunnelbroker also requires a [RabbitMQ](https://www.rabbitmq.com/) server to run. It will be started in local a docker container when running in dev-mode.
+
+First, you need to initialize the local cloud using the following command from the the `services` directory:
+
+```
+yarn init-local-cloud
+```
+
+This will start the LocalStack docker image and initialize required setup, including DynamoDB tables, s3 buckets using [Terraform](https://www.terraform.io/) scripts located in `services/terraform`.
+
+To start a certain service in development mode you can run the following command:
+
+```
+yarn run-[service-name]-service-dev-mode
+```
+
+For example, for Tunnelbroker the command will look like this: 
+
+```
+yarn run-tunnelbroker-service-dev-mode
+```
+
+You can also run all services at once in the dev-mode using the command below: 
+
+```
+yarn run-all-services-dev-mode
+```
