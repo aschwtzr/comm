@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
   },
   outerRingSelected: {
     backgroundColor: '#404040',
-    borderRadius: 40,
+    borderRadius: 50,
     height: 60,
     margin: 5,
     width: 60,
