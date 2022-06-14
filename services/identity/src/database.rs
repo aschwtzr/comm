@@ -13,6 +13,7 @@ use tracing::{error, info};
 use crate::opaque::Cipher;
 use crate::token::{AccessToken, AuthType};
 
+#[derive(Clone)]
 pub struct DatabaseClient {
   client: DynamoDbClient,
 }
