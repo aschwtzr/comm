@@ -194,19 +194,19 @@ function trySaveBackup(
 }
 
 async function deleteOldestBackup() {
-  const [backupConfig, backupInfos] = await Promise.all([
-    getBackupConfig(),
-    getSortedBackupInfos(),
-  ]);
-
-  invariant(backupConfig, 'backupConfig should be non-null');
+  const backupInfos = await getSortedBackupInfos();
   if (backupInfos.length === 0) {
     throw new Error('no_backups_left');
   }
-
   const oldestFilename = backupInfos[0].filename;
+  await deleteBackup(oldestFilename);
+}
+
+async function deleteBackup(filename: string) {
+  const backupConfig = await getBackupConfig();
+  invariant(backupConfig, 'backupConfig should be non-null');
   try {
-    await unlink(`${backupConfig.directory}/${oldestFilename}`);
+    await unlink(`${backupConfig.directory}/${filename}`);
   } catch (e) {
     // Check if it's already been deleted
     if (e.code !== 'ENOENT') {
