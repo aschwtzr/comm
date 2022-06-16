@@ -58,8 +58,8 @@ message PakeRegistrationUploadAndCredentialRequest {
 message WalletLoginRequest {
   string userID = 1;
   string deviceID = 2;
-  string walletAddress = 3;
-  bytes signedMessage = 4;
+  string message = 3;
+  bytes signature = 4;
 }
 
 message WalletLoginResponse {
