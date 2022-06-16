@@ -59,7 +59,9 @@ div.sidebar:hover .menu {
   background: var(--chat-thread-list-menu-active-bg);
 }
 .menuSidebar {
-  padding-right: 2px;
+  position: absolute;
+  top: 20%;
+  right: 0.5%;
 }
 
 button.menuContent {
