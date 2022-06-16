@@ -58,12 +58,12 @@ message PakeRegistrationUploadAndCredentialRequest {
 message WalletLoginRequest {
   string userID = 1;
   string deviceID = 2;
-  string walletAddress = 3;
-  bytes signedMessage = 4;
+  string siweMessage = 3;
+  bytes siweSignature = 4;
 }
 
 message WalletLoginResponse {
-  bytes token = 1;
+  string token = 1;
 }
 
 // RegisterUser
