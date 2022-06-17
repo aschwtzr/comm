@@ -49,6 +49,7 @@ RUN echo "deb http://deb.debian.org/debian unstable main non-free contrib" \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   rsync \
   mysql-client \
+  sendmail \
   && rm -rf /var/lib/apt/lists/*
 
 #-------------------------------------------------------------------------------
