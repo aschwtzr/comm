@@ -2,6 +2,8 @@
 
 import nodemailer from 'nodemailer';
 
+import postmark from '../../facts/postmark.json';
+
 type MailInfo = {
   +from: string,
   +to: string,
@@ -14,6 +16,14 @@ type Transport = {
   ...
 };
 
-const sendmail: Transport = nodemailer.createTransport({ sendmail: true });
+const sendmail: Transport = nodemailer.createTransport({
+  host: 'smtp.postmarkapp.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: postmark.apiToken,
+    pass: postmark.apiToken,
+  },
+});
 
 export default sendmail;
