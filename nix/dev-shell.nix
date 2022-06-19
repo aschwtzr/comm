@@ -9,6 +9,7 @@
 , cocoapods
 , cryptopp
 , darwin
+, fbjni
 , folly
 , fmt
 , grpc
@@ -62,6 +63,7 @@ mkShell {
     # protobuf exposes both a library and a command
     # thus should appear in both inputs
     protobuf_3_15_cmake
+    fbjni # android builds
     folly # cpp tools
     fmt # needed for folly
     boost # needed for folly

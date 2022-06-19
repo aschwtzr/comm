@@ -19,6 +19,8 @@ prev:
 
   devShell = final.callPackage ./dev-shell.nix { };
 
+  fbjni = prev.callPackage ./fbjni.nix { };
+
   mysql-down = prev.callPackage ./mysql-down-linux.nix { };
 
   mysql-up = prev.callPackage ./mysql-up-linux.nix { };
