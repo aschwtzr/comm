@@ -34,4 +34,6 @@ prev:
       cp $NIX_BUILD_TOP/${oldAttrs.src.name}/include/olm/*.h* ''${!outputDev}/include/olm
     '';
   });
+
+  fbjni = prev.callPackage ./fbjni.nix { };
 }
