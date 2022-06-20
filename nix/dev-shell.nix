@@ -1,6 +1,7 @@
 { mkShell
 , stdenv
 , lib
+, androidDevEnv
 , amqp-cpp
 , arcanist
 , boost
@@ -68,6 +69,9 @@ mkShell {
     olm # needed for CryptoTools
     sqlite # needed for sqlite_orm
     openssl # needed for grpc
+  ] ++ lib.optionals stdenv.isx86_64 [
+    # aarch64-darwin tarballs are not available
+    androidDevEnv.androidsdk
   ] ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
     CoreFoundation
     CoreServices
