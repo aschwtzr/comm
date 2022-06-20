@@ -6,14 +6,14 @@ include(GNUInstallDirs)
 find_package(Folly REQUIRED)
 
 set(TOOLS_HDRS
-  "include/comm/Tools/CommSecureStore.h"
-  "include/comm/Tools/Logger.h"
-  "include/comm/Tools/PlatformSpecificTools.h"
-  "include/comm/Tools/WorkerThread.h"
+  "CommSecureStore.h"
+  "Logger.h"
+  "PlatformSpecificTools.h"
+  "WorkerThread.h"
   )
 
 set(TOOLS_SRCS
-  "src/WorkerThread.cpp"
+  "WorkerThread.cpp"
   )
 
 add_library(comm-tools
@@ -28,7 +28,7 @@ target_link_libraries(comm-tools
 # reference local directory when building, use installation path when installing
 target_include_directories(comm-tools
   PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>
   $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
@@ -38,7 +38,7 @@ install(TARGETS comm-tools EXPORT comm-tools-export
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT comm-tools
 )
 
-install(FILES ${TOOLS_HDRS} DESTINATION include/comm/Tools)
+install(FILES ${TOOLS_HDRS} DESTINATION include/Tools)
 
 # For development purposes, can point cmake to this directory if doing development
 export(TARGETS comm-tools
