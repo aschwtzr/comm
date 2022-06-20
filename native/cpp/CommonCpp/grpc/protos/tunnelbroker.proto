@@ -76,17 +76,36 @@ message GetResponse {
   repeated string blobHashes = 3;
 }
 
-message OutboundMessage {
+// The messages from the Tunnelbroker to the Client
+
+message OutboundMessageStruct {
   string toDeviceID = 1;
   string payload = 2;
   repeated string blobHashes = 3;
 }
 
-message InboundMessage {
+message OutboundMessage {
+  string sessionID = 1;
+  oneof data {
+    OutboundMessageStruct payloadMessage = 2;
+    string newMessageID = 3;
+  }
+}
+
+// The messages from the Client to the Tunnelbroker
+
+message InboundMessageStruct {
   string fromDeviceID = 1;
-  string fromConnectionID = 2;
-  string payload = 3;
-  repeated string blobHashes = 4;
+  string payload = 2;
+  repeated string blobHashes = 3;
+}
+
+message InboundMessage {
+  string sessionID = 1;
+  oneof data {
+    InboundMessageStruct payloadMessage = 2;
+    int64 checkpointTime = 3;
+  }
 }
 
 // Old API structures
