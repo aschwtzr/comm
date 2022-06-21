@@ -185,22 +185,22 @@ function AddUsersList(props: Props): React.Node {
 
   const callUpdateRelationships = useServerCall(updateRelationships);
   const dispatchActionPromise = useDispatchActionPromise();
-  const confirmSelection = React.useCallback(async () => {
-    await dispatchActionPromise(
-      updateRelationshipsActionTypes,
-      callUpdateRelationships({
-        action: relationshipAction,
-        userIDs: [...pendingUserIDs],
-      }),
-    );
+  const updateRelationshipsPromiseCreator = React.useCallback(async () => {
+    const result = await callUpdateRelationships({
+      action: relationshipAction,
+      userIDs: [...pendingUserIDs],
+    });
     closeModal();
-  }, [
-    callUpdateRelationships,
-    dispatchActionPromise,
-    closeModal,
-    pendingUserIDs,
-    relationshipAction,
-  ]);
+    return result;
+  }, [callUpdateRelationships, closeModal, pendingUserIDs, relationshipAction]);
+  const confirmSelection = React.useCallback(
+    () =>
+      dispatchActionPromise(
+        updateRelationshipsActionTypes,
+        updateRelationshipsPromiseCreator(),
+      ),
+    [dispatchActionPromise, updateRelationshipsPromiseCreator],
+  );
   const loadingStatus = useSelector(loadingStatusSelector);
 
   return (
