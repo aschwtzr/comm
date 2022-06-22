@@ -3,6 +3,7 @@
 #include "CreateNewBackupReactor.h"
 #include "DatabaseManager.h"
 #include "PullBackupReactor.h"
+#include "ReactorStatusHolder.h"
 #include "RecoverBackupKeyReactor.h"
 #include "SendLogReactor.h"
 
@@ -80,6 +81,40 @@ grpc::ServerUnaryReactor *BackupServiceImpl::AddAttachments(
       std::shared_ptr<database::LogItem> logItem =
           database::DatabaseManager::getInstance().findLogItem(backupID, logID);
       logItem->addAttachmentHolders(holders);
+      if (database::LogItem::getItemSize(logItem.get()) >
+          LOG_DATA_SIZE_DATABASE_LIMIT) {
+        std::string holder = tools::generateHolder(
+            logItem->getDataHash(),
+            logItem->getBackupID(),
+            logItem->getLogID());
+        std::string data = std::move(logItem->getValue());
+        logItem = std::make_shared<database::LogItem>(
+            logItem->getBackupID(),
+            logItem->getLogID(),
+            logItem->getPersistedInBlob(),
+            holder,
+            logItem->getAttachmentHolders(),
+            logItem->getDataHash());
+        // put into S3
+        std::condition_variable blobPutDoneCV;
+        std::mutex blobPutDoneCVMutex;
+        std::shared_ptr<reactor::BlobPutClientReactor> putReactor =
+            std::make_shared<reactor::BlobPutClientReactor>(
+                holder, logItem->getDataHash(), &blobPutDoneCV);
+        ServiceBlobClient().put(putReactor);
+        std::unique_lock<std::mutex> lockPut(blobPutDoneCVMutex);
+        putReactor->scheduleSendingDataChunk(
+            std::make_unique<std::string>(std::move(data)));
+        putReactor->scheduleSendingDataChunk(std::make_unique<std::string>(""));
+        if (putReactor->getStatusHolder()->state !=
+            reactor::ReactorState::DONE) {
+          blobPutDoneCV.wait(lockPut);
+        }
+        if (!putReactor->getStatusHolder()->getStatus().ok()) {
+          throw std::runtime_error(
+              putReactor->getStatusHolder()->getStatus().error_message());
+        }
+      }
       database::DatabaseManager::getInstance().putLogItem(*logItem);
     }
   } catch (std::runtime_error &e) {
