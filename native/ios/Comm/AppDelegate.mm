@@ -16,8 +16,10 @@
 
 #import "CommCoreModule.h"
 #import "GlobalNetworkSingleton.h"
+#import "Logger.h"
 #import "NetworkModule.h"
 #import "SQLiteQueryExecutor.h"
+#import "ThreadOperations.h"
 #import "Tools.h"
 #import <cstdio>
 #import <stdexcept>
@@ -52,6 +54,7 @@ static void InitializeFlipper(UIApplication *application) {
 #import <UserNotifications/UserNotifications.h>
 
 NSString *const backgroundNotificationTypeKey = @"backgroundNotifType";
+NSString *const setUnreadStatusKey = @"setUnreadStatus";
 
 @interface AppDelegate () <
     RCTCxxBridgeDelegate,
@@ -157,6 +160,14 @@ NSString *const backgroundNotificationTypeKey = @"backgroundNotifType";
     return YES;
   } else if ([notification[backgroundNotificationTypeKey]
                  isEqualToString:@"CLEAR"]) {
+    if (notification[setUnreadStatusKey] && notification[@"threadID"]) {
+      std::string threadID =
+          std::string([notification[@"threadID"] UTF8String]);
+      // this callback may be called from inactive state so we need
+      // to initialize the database
+      [self attemptDatabaseInitialization];
+      comm::ThreadOperations::updateSQLiteUnreadStatus(threadID, false);
+    }
     [[UNUserNotificationCenter currentNotificationCenter]
         getDeliveredNotificationsWithCompletionHandler:^(
             NSArray<UNNotification *> *notifications) {
@@ -234,22 +245,18 @@ using Runtime = facebook::jsi::Runtime;
 - (void)attemptDatabaseInitialization {
   std::string sqliteFilePath =
       std::string([[Tools getSQLiteFilePath] UTF8String]);
-
-  // Previous versions of Comm app used to keep SQLite database at location
-  // that was specific to the app. Now that we share SQLite database with
-  // NotificationService extension we need to keep the database in place
-  // defined by App Groups. The code below is a migration fired if user
-  // upgrades from version using app-specific path to newer that uses
-  // App Groups.
-  NSString *appSpecificSQLiteFilePath = [Tools getAppSpecificSQLiteFilePath];
-  if ([NSFileManager.defaultManager
-          fileExistsAtPath:appSpecificSQLiteFilePath] &&
+  // Previous Comm versions used app group location for SQLite
+  // database, so that NotificationService was able to acces it directly.
+  // Unfortunately it caused errores related to system locks. The code
+  // below re-migrates SQLite from app group to app specific location
+  // on devices where previous Comm version was installed.
+  NSString *appGroupSQLiteFilePath = [Tools getAppGroupSQLiteFilePath];
+  if ([NSFileManager.defaultManager fileExistsAtPath:appGroupSQLiteFilePath] &&
       std::rename(
-          std::string([appSpecificSQLiteFilePath UTF8String]).c_str(),
+          std::string([appGroupSQLiteFilePath UTF8String]).c_str(),
           sqliteFilePath.c_str())) {
     throw std::runtime_error(
-        "Failed to move SQLite database from app-specific to app group "
-        "location");
+        "Failed to move SQLite database from app group to default location");
   }
   comm::SQLiteQueryExecutor::initialize(sqliteFilePath);
 }

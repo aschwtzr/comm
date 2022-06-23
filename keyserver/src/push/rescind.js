@@ -59,6 +59,7 @@ async function rescindPushNotifs(
         const notification = prepareIOSNotification(
           delivery.iosID,
           row.unread_count,
+          threadID,
         );
         deliveryPromises[id] = apnPush({
           notification,
@@ -86,6 +87,7 @@ async function rescindPushNotifs(
         const notification = prepareIOSNotification(
           iosID,
           row.unread_count,
+          threadID,
           codeVersion,
         );
         deliveryPromises[id] = apnPush({
@@ -166,6 +168,7 @@ async function rescindPushNotifs(
 function prepareIOSNotification(
   iosID: string,
   unreadCount: number,
+  threadID: string,
   codeVersion: ?number,
 ): apn.Notification {
   const notification = new apn.Notification();
@@ -173,10 +176,12 @@ function prepareIOSNotification(
   notification.badge = unreadCount;
   notification.topic = getAPNsNotificationTopic(codeVersion);
   notification.payload =
-    codeVersion && codeVersion > 1000
+    codeVersion && codeVersion > 135
       ? {
           backgroundNotifType: 'CLEAR',
           notificationId: iosID,
+          setUnreadStatus: true,
+          threadID,
         }
       : {
           managedAps: {
@@ -209,6 +214,7 @@ function prepareAndroidNotification(
       badge: unreadCount.toString(),
       rescind: 'true',
       rescindID: notifID,
+      setUnreadStatus: 'true',
       threadID,
     },
   };

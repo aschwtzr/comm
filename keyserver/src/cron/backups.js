@@ -16,9 +16,19 @@ const readdir = promisify(fs.readdir);
 const lstat = promisify(fs.lstat);
 const unlink = promisify(fs.unlink);
 
+type BackupConfig = {
+  +enabled: boolean,
+  +directory: string,
+  +maxDirSizeMiB?: ?number,
+};
+
+function getBackupConfig(): Promise<?BackupConfig> {
+  return importJSON({ folder: 'facts', name: 'backups' });
+}
+
 async function backupDB() {
   const [backupConfig, dbConfig] = await Promise.all([
-    importJSON({ folder: 'facts', name: 'backups' }),
+    getBackupConfig(),
     getDBConfig(),
   ]);
 
@@ -65,6 +75,8 @@ async function backupDB() {
     console.warn(`saveBackup threw for ${filename}`, e);
     await unlink(filePath);
   }
+
+  await deleteOldBackupsIfSpaceExceeded();
 }
 
 function mysqldump(
@@ -185,33 +197,80 @@ function trySaveBackup(
 }
 
 async function deleteOldestBackup() {
-  const backupConfig = await importJSON({ folder: 'facts', name: 'backups' });
-  invariant(backupConfig, 'backupConfig should be non-null');
-  const files = await readdir(backupConfig.directory);
-  let oldestFile;
-  for (const file of files) {
-    if (!file.endsWith('.sql.gz') || !file.startsWith('comm.')) {
-      continue;
-    }
-    const stat = await lstat(`${backupConfig.directory}/${file}`);
-    if (stat.isDirectory()) {
-      continue;
-    }
-    if (!oldestFile || stat.mtime < oldestFile.mtime) {
-      oldestFile = { file, mtime: stat.mtime };
-    }
-  }
-  if (!oldestFile) {
+  const sortedBackupInfos = await getSortedBackupInfos();
+  if (sortedBackupInfos.length === 0) {
     throw new Error('no_backups_left');
   }
+  const oldestFilename = sortedBackupInfos[0].filename;
+  await deleteBackup(oldestFilename);
+}
+
+async function deleteBackup(filename: string) {
+  const backupConfig = await getBackupConfig();
+  invariant(backupConfig, 'backupConfig should be non-null');
   try {
-    await unlink(`${backupConfig.directory}/${oldestFile.file}`);
+    await unlink(`${backupConfig.directory}/${filename}`);
   } catch (e) {
     // Check if it's already been deleted
     if (e.code !== 'ENOENT') {
       throw e;
     }
   }
+}
+
+type BackupInfo = {
+  +filename: string,
+  +lastModifiedTime: number,
+  +bytes: number,
+};
+async function getSortedBackupInfos(): Promise<BackupInfo[]> {
+  const backupConfig = await getBackupConfig();
+  invariant(backupConfig, 'backupConfig should be non-null');
+
+  const filenames = await readdir(backupConfig.directory);
+  const backups = await Promise.all(
+    filenames.map(async filename => {
+      if (!filename.startsWith('comm.') || !filename.endsWith('.sql.gz')) {
+        return null;
+      }
+      const stats = await lstat(`${backupConfig.directory}/${filename}`);
+      if (stats.isDirectory()) {
+        return null;
+      }
+      return {
+        filename,
+        lastModifiedTime: stats.mtime,
+        bytes: stats.size,
+      };
+    }),
+  );
+
+  const filteredBackups = backups.filter(Boolean);
+  filteredBackups.sort((a, b) => a.lastModifiedTime - b.lastModifiedTime);
+  return filteredBackups;
+}
+
+async function deleteOldBackupsIfSpaceExceeded() {
+  const backupConfig = await getBackupConfig();
+  invariant(backupConfig, 'backupConfig should be non-null');
+  const { maxDirSizeMiB } = backupConfig;
+  if (!maxDirSizeMiB) {
+    return;
+  }
+
+  const sortedBackupInfos = await getSortedBackupInfos();
+  const mostRecentBackup = sortedBackupInfos.pop();
+  let bytesLeft = maxDirSizeMiB * 1024 * 1024 - mostRecentBackup.bytes;
+
+  const deleteBackupPromises = [];
+  for (let i = sortedBackupInfos.length - 1; i >= 0; i--) {
+    const backupInfo = sortedBackupInfos[i];
+    bytesLeft -= backupInfo.bytes;
+    if (bytesLeft <= 0) {
+      deleteBackupPromises.push(deleteBackup(backupInfo.filename));
+    }
+  }
+  await Promise.all(deleteBackupPromises);
 }
 
 export { backupDB };

@@ -1,4 +1,4 @@
-FROM rust:1.57
+FROM rust:1.61
 
 # Create a new user comm and use it to run subsequent commands
 RUN useradd -m comm
@@ -18,6 +18,7 @@ RUN cargo build --release
 RUN rm src/*.rs
 
 COPY services/identity .
+COPY native/cpp/CommonCpp/grpc/protos/identity.proto protos/
 
 # Remove the previously-built binary so that only the application itself is
 # rebuilt
