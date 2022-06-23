@@ -8,17 +8,18 @@ use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
 use crate::database::DatabaseClient;
-use crate::token::{AccessToken, AuthType};
+use crate::token::{AccessTokenData, AuthType};
 use crate::{config::Config, database::Error};
 
 pub use proto::identity_service_server::IdentityServiceServer;
 use proto::{
   identity_service_server::IdentityService,
   login_response::Data::PakeLoginResponse,
-  login_response::Data::WalletLoginResponse, pake_login_response::Data::Token,
-  LoginRequest, LoginResponse, PakeLoginResponse as PakeLoginResponseStruct,
-  RegistrationRequest, RegistrationResponse, VerifyUserTokenRequest,
-  VerifyUserTokenResponse, WalletLoginResponse as WalletLoginResponseStruct,
+  login_response::Data::WalletLoginResponse,
+  pake_login_response::Data::AccessToken, LoginRequest, LoginResponse,
+  PakeLoginResponse as PakeLoginResponseStruct, RegistrationRequest,
+  RegistrationResponse, VerifyUserTokenRequest, VerifyUserTokenResponse,
+  WalletLoginResponse as WalletLoginResponseStruct,
 };
 
 mod proto {
@@ -102,17 +103,21 @@ async fn put_token_helper(
   device_id: String,
   rng: &mut (impl Rng + CryptoRng),
 ) -> Result<LoginResponse, Status> {
-  let token = AccessToken::new(user_id, device_id, auth_type.clone(), rng);
-  match client.put_token(token.clone()).await {
+  let access_token_data =
+    AccessTokenData::new(user_id, device_id, auth_type.clone(), rng);
+  match client
+    .put_access_token_data(access_token_data.clone())
+    .await
+  {
     Ok(_) => match auth_type {
       AuthType::Wallet => Ok(LoginResponse {
         data: Some(WalletLoginResponse(WalletLoginResponseStruct {
-          token: token.token,
+          access_token: access_token_data.access_token,
         })),
       }),
       AuthType::Password => Ok(LoginResponse {
         data: Some(PakeLoginResponse(PakeLoginResponseStruct {
-          data: Some(Token(token.token)),
+          data: Some(AccessToken(access_token_data.access_token)),
         })),
       }),
     },
