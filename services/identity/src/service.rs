@@ -343,3 +343,41 @@ async fn pake_login_start(
     }
   }
 }
+
+async fn pake_login_finish(
+  user_id: Option<String>,
+  device_id: Option<String>,
+  client: DatabaseClient,
+  server_login: Option<ServerLogin<Cipher>>,
+  pake_credential_finalization: &[u8],
+  rng: &mut (impl Rng + CryptoRng),
+  num_messages_received: u8,
+) -> Result<LoginResponse, Status> {
+  if num_messages_received != 1 {
+    error!("Too many messages received in stream, aborting");
+    return Err(Status::aborted("please retry"));
+  }
+  let user_id = user_id.ok_or_else(|| Status::aborted("user not found"))?;
+  let device_id = device_id.ok_or_else(|| Status::aborted("user not found"))?;
+  match server_login
+    .ok_or_else(|| Status::aborted("login failed"))?
+    .finish(
+      CredentialFinalization::deserialize(pake_credential_finalization)
+        .map_err(|e| {
+          error!("Failed to deserialize credential finalization bytes: {}", e);
+          Status::aborted("login failed")
+        })?,
+    ) {
+    Ok(_) => {
+      put_token_helper(client, AuthType::Password, user_id, device_id, rng)
+        .await
+    }
+    Err(e) => {
+      error!(
+        "Encountered a PAKE protocol error when finishing login: {}",
+        e
+      );
+      Err(Status::aborted("server error"))
+    }
+  }
+}
