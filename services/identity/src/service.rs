@@ -1,6 +1,10 @@
 use chrono::Utc;
 use constant_time_eq::constant_time_eq;
 use futures_core::Stream;
+use opaque_ke::{
+  CredentialFinalization, CredentialRequest, ServerLogin,
+  ServerLoginStartParameters,
+};
 use rand::rngs::OsRng;
 use rand::{CryptoRng, Rng};
 use rusoto_core::RusotoError;
@@ -13,6 +17,7 @@ use tonic::{Request, Response, Status};
 use tracing::{error, info, instrument};
 
 use crate::database::DatabaseClient;
+use crate::opaque::Cipher;
 use crate::token::{AccessTokenData, AuthType};
 use crate::{config::Config, database::Error};
 
@@ -23,7 +28,12 @@ use proto::{
   login_request::Data::WalletLoginRequest,
   login_response::Data::PakeLoginResponse,
   login_response::Data::WalletLoginResponse,
-  pake_login_response::Data::AccessToken, LoginRequest, LoginResponse,
+  pake_login_request::Data::PakeCredentialFinalization,
+  pake_login_request::Data::PakeCredentialRequestAndUserId,
+  pake_login_response::Data::AccessToken,
+  pake_login_response::Data::PakeCredentialResponse, LoginRequest,
+  LoginResponse,
+  PakeCredentialRequestAndUserId as PakeCredentialRequestAndUserIdStruct,
   PakeLoginResponse as PakeLoginResponseStruct, RegistrationRequest,
   RegistrationResponse, VerifyUserTokenRequest, VerifyUserTokenResponse,
   WalletLoginRequest as WalletLoginRequestStruct,
@@ -259,5 +269,77 @@ async fn wallet_login_helper(
       .await
     }
     Err(e) => Err(e),
+  }
+}
+
+async fn pake_login_start(
+  config: Config,
+  client: DatabaseClient,
+  pake_credential_request_and_user_id: PakeCredentialRequestAndUserIdStruct,
+  server_login: &mut Option<ServerLogin<Cipher>>,
+  num_messages_received: u8,
+) -> Result<LoginResponse, Status> {
+  if num_messages_received != 0 {
+    error!("Too many messages received in stream, aborting");
+    return Err(Status::aborted("please retry"));
+  }
+  let server_registration = match client
+    .get_pake_registration(pake_credential_request_and_user_id.user_id.clone())
+    .await
+  {
+    Ok(Some(r)) => r,
+    Ok(None) => {
+      return Err(Status::not_found("user not found"));
+    }
+    Err(e) => match e {
+      Error::RusotoGet(RusotoError::Service(
+        GetItemError::ResourceNotFound(_),
+      ))
+      | Error::RusotoGet(RusotoError::Credentials(_)) => {
+        return Err(Status::failed_precondition("internal error"));
+      }
+      Error::RusotoGet(_) => {
+        return Err(Status::unavailable("please retry"));
+      }
+      e => {
+        error!("Encountered an unexpected error: {}", e);
+        return Err(Status::failed_precondition("unexpected error"));
+      }
+    },
+  };
+  let credential_request = CredentialRequest::deserialize(
+    &pake_credential_request_and_user_id.pake_credential_request,
+  )
+  .map_err(|e| {
+    error!("Failed to deserialize credential request: {}", e);
+    Status::invalid_argument("invalid message")
+  })?;
+  match ServerLogin::start(
+    &mut OsRng,
+    server_registration,
+    &config.server_secret_key,
+    credential_request,
+    ServerLoginStartParameters::default(),
+  ) {
+    Ok(server_login_start_result) => {
+      *server_login = Some(server_login_start_result.state);
+      Ok(LoginResponse {
+        data: Some(PakeLoginResponse(PakeLoginResponseStruct {
+          data: Some(PakeCredentialResponse(
+            server_login_start_result.message.serialize().map_err(|e| {
+              error!("Failed to serialize PAKE message: {}", e);
+              Status::failed_precondition("internal error")
+            })?,
+          )),
+        })),
+      })
+    }
+    Err(e) => {
+      error!(
+        "Encountered a PAKE protocol error when starting login: {}",
+        e
+      );
+      Err(Status::aborted("server error"))
+    }
   }
 }
