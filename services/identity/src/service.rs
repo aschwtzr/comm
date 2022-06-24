@@ -76,8 +76,12 @@ impl IdentityService for MyIdentityService {
   ) -> Result<Response<Self::LoginUserStream>, Status> {
     let mut in_stream = request.into_inner();
     let (tx, rx) = mpsc::channel(1);
+    let config = self.config.clone();
     let client = self.client.clone();
     tokio::spawn(async move {
+      let mut user_id: Option<String> = None;
+      let mut device_id: Option<String> = None;
+      let mut server_login: Option<ServerLogin<Cipher>> = None;
       let mut num_messages_received = 0;
       while let Some(message) = in_stream.next().await {
         match message {
@@ -101,7 +105,67 @@ impl IdentityService for MyIdentityService {
                   }
                   break;
                 }
-                PakeLoginRequest(_) => unimplemented!(),
+                PakeLoginRequest(req) => {
+                  if let Some(data) = req.data {
+                    match data {
+                      PakeCredentialRequestAndUserId(
+                        pake_credential_request_and_user_id,
+                      ) => {
+                        if let Err(e) = tx
+                          .send(
+                            pake_login_start(
+                              config.clone(),
+                              client.clone(),
+                              pake_credential_request_and_user_id.clone(),
+                              &mut server_login,
+                              num_messages_received,
+                            )
+                            .await,
+                          )
+                          .await
+                        {
+                          error!("Response was dropped: {}", e);
+                          break;
+                        }
+                        user_id =
+                          Some(pake_credential_request_and_user_id.user_id);
+                        device_id =
+                          Some(pake_credential_request_and_user_id.device_id);
+                      }
+                      PakeCredentialFinalization(
+                        pake_credential_finalization,
+                      ) => {
+                        if let Err(e) = tx
+                          .send(
+                            pake_login_finish(
+                              user_id,
+                              device_id,
+                              client,
+                              server_login,
+                              &pake_credential_finalization,
+                              &mut OsRng,
+                              num_messages_received,
+                            )
+                            .await,
+                          )
+                          .await
+                        {
+                          error!("Response was dropped: {}", e);
+                        }
+                        break;
+                      }
+                    }
+                  } else {
+                    error!("Received empty PAKE login request");
+                    if let Err(e) = tx
+                      .send(Err(Status::invalid_argument("invalid message")))
+                      .await
+                    {
+                      error!("Response was dropped: {}", e);
+                    }
+                    break;
+                  }
+                }
               }
             } else {
               error!("Received empty login request");
