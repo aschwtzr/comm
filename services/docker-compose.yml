@@ -11,6 +11,7 @@ services:
       dockerfile: services/tunnelbroker/Dockerfile
       context: ../
       args:
+        - COMM_BASE_IMAGE_M1_SUFFIX=${COMM_BASE_IMAGE_M1_SUFFIX}
         - COMM_TEST_SERVICES=${COMM_TEST_SERVICES}
         - COMM_SERVICES_DEV_MODE=${COMM_SERVICES_DEV_MODE}
     image: commapp/tunnelbroker-server:0.2
@@ -29,6 +30,7 @@ services:
       dockerfile: services/backup/Dockerfile
       context: ../
       args:
+        - COMM_BASE_IMAGE_M1_SUFFIX=${COMM_BASE_IMAGE_M1_SUFFIX}
         - COMM_TEST_SERVICES=${COMM_TEST_SERVICES}
         - COMM_SERVICES_DEV_MODE=${COMM_SERVICES_DEV_MODE}
     image: commapp/backup-server:0.1
@@ -44,6 +46,7 @@ services:
       dockerfile: services/blob/Dockerfile
       context: ../
       args:
+        - COMM_BASE_IMAGE_M1_SUFFIX=${COMM_BASE_IMAGE_M1_SUFFIX}
         - COMM_TEST_SERVICES=${COMM_TEST_SERVICES}
         - COMM_SERVICES_DEV_MODE=${COMM_SERVICES_DEV_MODE}
     image: commapp/blob-server:0.1

@@ -1,4 +1,5 @@
-FROM commapp/services-base:1.1
+ARG COMM_BASE_IMAGE_M1_SUFFIX
+FROM commapp/services-base:1.1${COMM_BASE_IMAGE_M1_SUFFIX}
 
 ARG MAKE_JOBS=4
 ENV MAKEFLAGS="-j${MAKE_JOBS}"
