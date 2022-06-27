@@ -50,6 +50,11 @@ mod proto {
   tonic::include_proto!("identity");
 }
 
+enum PakeWorkflow {
+  Registration,
+  Login,
+}
+
 #[derive(derive_more::Constructor)]
 pub struct MyIdentityService {
   config: Config,
