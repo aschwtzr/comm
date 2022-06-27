@@ -10,8 +10,8 @@
 ; Flow doesn't support platforms
 .*/Libraries/Utilities/LoadingView.js
 
-.*/comm/web/.*
-.*/comm/keyserver/.*
+.*/<PROJECT_ROOT>/web/.*
+.*/<PROJECT_ROOT>/keyserver/.*
 
 .*/android/app/build/.*
 
