@@ -1,4 +1,5 @@
-FROM commapp/services-base:1.1
+ARG COMM_BASE_IMAGE
+FROM ${COMM_BASE_IMAGE}
 
 RUN apt-get update && \
   apt-get install -y uuid-dev && \

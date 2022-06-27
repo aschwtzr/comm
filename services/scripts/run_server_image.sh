@@ -29,5 +29,12 @@ else
   exit 1
 fi
 
+DOCKERFILE="commapp/services-base:1.1"
+if [[ $(uname -m) == 'arm64' ]]; then
+  DOCKERFILE="commapp/services-base:1.1.m1"
+fi
+
+export COMM_BASE_IMAGE=$DOCKERFILE
+
 docker-compose build $SERVICE-server
 docker-compose up $SERVICE-server
