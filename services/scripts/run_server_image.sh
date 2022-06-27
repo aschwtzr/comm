@@ -29,5 +29,10 @@ else
   exit 1
 fi
 
-docker-compose build $SERVICE-server
-docker-compose up $SERVICE-server
+DOCKERFILE="Dockerfile"
+if [[ $(uname -m) == 'arm64' ]]; then
+  DOCKERFILE="Dockerfile.m1"
+fi
+
+COMM_SERVICES_DOCKERFILE=$DOCKERFILE docker-compose build $SERVICE-server
+COMM_SERVICES_DOCKERFILE=$DOCKERFILE docker-compose up $SERVICE-server
