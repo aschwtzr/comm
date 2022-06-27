@@ -13,8 +13,8 @@ mod tools;
 
 use backup_utils::{BackupData, Item};
 use bytesize::ByteSize;
-use tools::get_grpc_chunk_size_limit;
 use tools::Error;
+use tools::{get_dynamo_db_item_size_limit, get_grpc_chunk_size_limit};
 
 use backup_utils::BackupServiceClient;
 
@@ -30,25 +30,30 @@ async fn backup_test() -> Result<(), Error> {
       String::new(),
       vec![ByteSize::mib(1).as_u64() as usize; 6],
       vec![
+        "holder0".to_string(),
         "holder1".to_string(),
         "holder2".to_string(),
-        "holder3".to_string(),
       ],
     ),
     log_items: vec![
-      Item::new(String::new(), vec![100], vec!["holder1".to_string()]),
+      // the item that almost hits the DB limit, we're going to later add a long
+      // list of attachments, so that causes it to exceed the limit.
+      // In this case its data should be moved to the S3
       Item::new(
         String::new(),
-        vec![ByteSize::kb(400).as_u64() as usize],
-        vec!["holder2".to_string(), "holder3".to_string()],
+        vec![get_dynamo_db_item_size_limit() - 300],
+        vec!["holder0".to_string(), "holder1".to_string()],
       ),
+      // just a small item
+      Item::new(String::new(), vec![100], vec!["holder0".to_string()]),
+      // a big item that should be placed in the S3 right away
       Item::new(
         String::new(),
         vec![get_grpc_chunk_size_limit(), get_grpc_chunk_size_limit()],
         vec![
+          "holder0".to_string(),
           "holder1".to_string(),
           "holder2".to_string(),
-          "holder3".to_string(),
         ],
       ),
     ],
@@ -116,6 +121,40 @@ async fn backup_test() -> Result<(), Error> {
     assert!(
       from_result == expected,
       "log {}: number of attachments holders do not match, expected {}, got {}",
+      i,
+      expected,
+      from_result
+    );
+  }
+
+  // push so many attachments that the log item's data will have to be moved
+  // from the db to the s3
+  let mut attachments_size = 0;
+  let mut i = backup_data.log_items[0].attachments_holders.len();
+  let mut new_attachments: Vec<String> = vec![];
+  while attachments_size < 500 {
+    let att = format!("holder{}", i);
+    attachments_size += att.len();
+    new_attachments.push(att);
+    i += 1;
+  }
+
+  let mut old_attachments =
+    backup_data.log_items[0].attachments_holders.clone();
+  backup_data.log_items[0].attachments_holders = new_attachments;
+  add_attachments::run(&mut client, &backup_data, Some(0)).await?;
+  backup_data.log_items[0]
+    .attachments_holders
+    .append(&mut old_attachments);
+  let result = pull_backup::run(&mut client, &backup_data).await?;
+  // check logs attachments
+  for i in 0..backup_data.log_items.len() {
+    let expected: usize = backup_data.log_items[i].attachments_holders.len();
+    let from_result: usize = result.log_items[i].attachments_holders.len();
+    assert!(
+      from_result == expected,
+      "after attachment add: log {}: number of attachments holders do not match,
+      expected {}, got {}",
       i,
       expected,
       from_result
