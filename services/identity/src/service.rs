@@ -37,12 +37,11 @@ use proto::{
   registration_request::Data::PakeCredentialFinalization as PakeRegistrationCredentialFinalization,
   registration_request::Data::PakeRegistrationRequestAndUserId,
   registration_request::Data::PakeRegistrationUploadAndCredentialRequest,
+  registration_response::Data::PakeLoginResponse as PakeRegistrationLoginResponse,
   registration_response::Data::PakeRegistrationResponse, LoginRequest,
-  LoginResponse,
-  PakeCredentialRequestAndUserId as PakeCredentialRequestAndUserIdStruct,
-  PakeLoginResponse as PakeLoginResponseStruct, RegistrationRequest,
-  RegistrationResponse, VerifyUserTokenRequest, VerifyUserTokenResponse,
-  WalletLoginRequest as WalletLoginRequestStruct,
+  LoginResponse, PakeLoginResponse as PakeLoginResponseStruct,
+  RegistrationRequest, RegistrationResponse, VerifyUserTokenRequest,
+  VerifyUserTokenResponse, WalletLoginRequest as WalletLoginRequestStruct,
   WalletLoginResponse as WalletLoginResponseStruct,
 };
 
@@ -114,14 +113,95 @@ impl IdentityService for MyIdentityService {
                 }
                 PakeRegistrationUploadAndCredentialRequest(
                   pake_registration_upload_and_credential_request,
-                ) => unimplemented!(),
+                ) => {
+                  if let Err(e) = tx
+                    .send(
+                      match pake_registration_finish(
+                        &user_id,
+                        client.clone(),
+                        &pake_registration_upload_and_credential_request
+                          .pake_registration_upload,
+                        server_registration,
+                        num_messages_received,
+                      )
+                      .await
+                      {
+                        Ok(_) => pake_login_start(
+                          config.clone(),
+                          client.clone(),
+                          &user_id.clone(),
+                          &pake_registration_upload_and_credential_request
+                            .pake_credential_request,
+                          &mut server_login,
+                          num_messages_received,
+                          PakeWorkflow::Registration,
+                        )
+                        .await
+                        .map(|pake_login_response| RegistrationResponse {
+                          data: Some(PakeRegistrationLoginResponse(
+                            pake_login_response,
+                          )),
+                        }),
+                        Err(e) => Err(e),
+                      },
+                    )
+                    .await
+                  {
+                    error!("Response was dropped: {}", e);
+                    break;
+                  }
+                  server_registration = None;
+                }
                 PakeRegistrationCredentialFinalization(
                   pake_credential_finalization,
-                ) => unimplemented!(),
+                ) => {
+                  if let Err(e) = tx
+                    .send(
+                      pake_login_finish(
+                        &user_id,
+                        &device_id,
+                        client,
+                        server_login,
+                        &pake_credential_finalization,
+                        &mut OsRng,
+                        num_messages_received,
+                        PakeWorkflow::Registration,
+                      )
+                      .await
+                      .map(|pake_login_response| {
+                        RegistrationResponse {
+                          data: Some(PakeRegistrationLoginResponse(
+                            pake_login_response,
+                          )),
+                        }
+                      }),
+                    )
+                    .await
+                  {
+                    error!("Response was dropped: {}", e);
+                  }
+                  break;
+                }
               }
+            } else {
+              error!("Received empty registration request");
+              if let Err(e) = tx
+                .send(Err(Status::invalid_argument("invalid message")))
+                .await
+              {
+                error!("Response was dropped: {}", e);
+              }
+              break;
             }
           }
-          Err(e) => unimplemented!(),
+          Err(e) => {
+            error!("Received an unexpected error: {}", e);
+            if let Err(e) = tx.send(Err(Status::unknown("unknown error"))).await
+            {
+              error!("Response was dropped: {}", e);
+            }
+            break;
+          }
         }
         num_messages_received += 1;
       }
