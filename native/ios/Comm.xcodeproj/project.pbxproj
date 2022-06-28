@@ -63,6 +63,8 @@
 		CB4821B127CFB1FA001AB7E1 /* GlobalNetworkSingleton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 726E5D762731A5E10032361D /* GlobalNetworkSingleton.cpp */; };
 		CB4821B227CFB20E001AB7E1 /* SQLiteQueryExecutor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 71BE84412636A944002849D2 /* SQLiteQueryExecutor.cpp */; };
 		CB64AA76284F4DC900460699 /* ThreadOperations.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB64AA74284F4DC900460699 /* ThreadOperations.cpp */; };
+		CBEA4A8A286EECCC00DFCFF5 /* NonBlockingLock.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */; };
+		CBEA4A8B286EED0400DFCFF5 /* NonBlockingLock.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */; };
 		D7DB6E0F85B2DBE15B01EC21 /* libPods-Comm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 994BEBDD4E4959F69CEA0BC3 /* libPods-Comm.a */; };
 		F02C296C528B51ADAB5AA19D /* libPods-NotificationService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EE4DCB430B05EC9DE7D7B01 /* libPods-NotificationService.a */; };
 /* End PBXBuildFile section */
@@ -209,6 +211,7 @@
 		CB64AA74284F4DC900460699 /* ThreadOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadOperations.cpp; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.cpp; sourceTree = "<group>"; };
 		CB64AA75284F4DC900460699 /* ThreadOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadOperations.h; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.h; sourceTree = "<group>"; };
 		CBEA4A88286EEC9100DFCFF5 /* NonBlockingLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonBlockingLock.h; path = Comm/TemporalMessageStorage/NonBlockingLock.h; sourceTree = "<group>"; };
+		CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = NonBlockingLock.mm; path = Comm/TemporalMessageStorage/NonBlockingLock.mm; sourceTree = "<group>"; };
 		F53DA7B3F26C2798DCE74A94 /* Pods-Comm.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Comm.debug.xcconfig"; path = "Target Support Files/Pods-Comm/Pods-Comm.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -560,6 +563,7 @@
 		CBEA4A87286EEC7600DFCFF5 /* TemporalMessageStorage */ = {
 			isa = PBXGroup;
 			children = (
+				CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */,
 				CBEA4A88286EEC9100DFCFF5 /* NonBlockingLock.h */,
 			);
 			name = TemporalMessageStorage;
@@ -940,6 +944,7 @@
 				711B408425DA97F9005F8F06 /* dummy.swift in Sources */,
 				726E5D782731A5E10032361D /* GlobalNetworkSingleton.cpp in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				CBEA4A8A286EECCC00DFCFF5 /* NonBlockingLock.mm in Sources */,
 				71BE844B2636A944002849D2 /* SQLiteQueryExecutor.cpp in Sources */,
 				2DDA0AE067906E18B83A455C /* ClientGetReadReactor.cpp in Sources */,
 			);
@@ -957,6 +962,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBEA4A8B286EED0400DFCFF5 /* NonBlockingLock.mm in Sources */,
 				CB38F2C0286C6CDF0010535C /* MessageOperationsUtilities.cpp in Sources */,
 				CB1648AF27CFBE6A00394D9D /* CryptoModule.cpp in Sources */,
 				CB1648AD27CFBBBB00394D9D /* ClientGetReadReactor.cpp in Sources */,
