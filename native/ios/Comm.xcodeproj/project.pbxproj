@@ -212,6 +212,7 @@
 		CB64AA75284F4DC900460699 /* ThreadOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadOperations.h; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.h; sourceTree = "<group>"; };
 		CBEA4A88286EEC9100DFCFF5 /* NonBlockingLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonBlockingLock.h; path = Comm/TemporalMessageStorage/NonBlockingLock.h; sourceTree = "<group>"; };
 		CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = NonBlockingLock.mm; path = Comm/TemporalMessageStorage/NonBlockingLock.mm; sourceTree = "<group>"; };
+		CBEA4A8C286EED3900DFCFF5 /* EncryptedFileUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EncryptedFileUtils.h; path = Comm/TemporalMessageStorage/EncryptedFileUtils.h; sourceTree = "<group>"; };
 		F53DA7B3F26C2798DCE74A94 /* Pods-Comm.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Comm.debug.xcconfig"; path = "Target Support Files/Pods-Comm/Pods-Comm.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -563,6 +564,7 @@
 		CBEA4A87286EEC7600DFCFF5 /* TemporalMessageStorage */ = {
 			isa = PBXGroup;
 			children = (
+				CBEA4A8C286EED3900DFCFF5 /* EncryptedFileUtils.h */,
 				CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */,
 				CBEA4A88286EEC9100DFCFF5 /* NonBlockingLock.h */,
 			);
