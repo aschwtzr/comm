@@ -12,6 +12,52 @@
 @end
 
 @implementation EncryptedFileUtils
++ (void)writeData:(NSString *)data
+     toFileAtPath:(NSString *)path
+            error:(NSError **)err {
+  NSData *binary = [EncryptedFileUtils _encryptData:data error:err];
+  if (!binary) {
+    return;
+  }
+  [binary writeToFile:path atomically:YES];
+}
+
++ (void)appendData:(NSString *)data
+      toFileAtPath:(NSString *)path
+             error:(NSError **)err {
+  NSData *binary = [EncryptedFileUtils _encryptData:data error:err];
+  if (!binary) {
+    return;
+  }
+  NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:path];
+  @try {
+    [fileHandle seekToEndOfFile];
+    [fileHandle writeData:binary];
+    [fileHandle closeFile];
+  } @catch (NSException *ex) {
+    *err = [NSError errorWithDomain:@"app.comm"
+                               code:NSFileWriteUnknownError
+                           userInfo:@{
+                             NSLocalizedDescriptionKey : ex.reason,
+                           }];
+  }
+}
+
++ (NSString *)readFromFileAtPath:(NSString *)path error:(NSError **)err {
+  NSData *binaryFileContent =
+      [NSData dataWithContentsOfFile:path
+                             options:NSDataReadingMappedIfSafe
+                               error:err];
+  if (!binaryFileContent) {
+    return nil;
+  }
+  return [EncryptedFileUtils _decryptBinary:binaryFileContent error:err];
+}
+
++ (void)clearContentAtPath:(NSString *)path error:(NSError **)err {
+  [@"" writeToFile:path atomically:YES encoding:NSUTF8StringEncoding error:err];
+}
+
 + (NSData *)_encryptData:(NSString *)data error:(NSError **)error {
   NSUInteger paddingLength =
       data.length + kCCBlockSizeAES128 - data.length % kCCBlockSizeAES128;
