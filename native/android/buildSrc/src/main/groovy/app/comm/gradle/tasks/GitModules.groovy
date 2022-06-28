@@ -99,7 +99,8 @@ class GitModules extends DefaultTask {
             cloneDir.mkdirs()
 
             def command = "git clone ${branchFlag} " +
-                "--recurse-submodules ${moduleURL} ${cloneDir.getPath()}"
+                "--depth 1 --recursive --shallow-submodules -j16 ${moduleURL} ${cloneDir.getPath()}"
+            print(command)
             def proc = command.execute()
             proc.waitFor()
             // Throw an error if 'git clone' was unsuccessfull
