@@ -208,6 +208,7 @@
 		CB3C621327CE66540054F24C /* libEXSecureStore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libEXSecureStore.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CB64AA74284F4DC900460699 /* ThreadOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadOperations.cpp; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.cpp; sourceTree = "<group>"; };
 		CB64AA75284F4DC900460699 /* ThreadOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadOperations.h; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.h; sourceTree = "<group>"; };
+		CBEA4A88286EEC9100DFCFF5 /* NonBlockingLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonBlockingLock.h; path = Comm/TemporalMessageStorage/NonBlockingLock.h; sourceTree = "<group>"; };
 		F53DA7B3F26C2798DCE74A94 /* Pods-Comm.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Comm.debug.xcconfig"; path = "Target Support Files/Pods-Comm/Pods-Comm.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -318,6 +319,7 @@
 		71B8CCB626BD30EC0040C0A2 /* CommCoreImplementations */ = {
 			isa = PBXGroup;
 			children = (
+				CBEA4A87286EEC7600DFCFF5 /* TemporalMessageStorage */,
 				71762A74270D8AAE00F565ED /* PlatformSpecificTools.mm */,
 				71D4D7CB26C50B1000FCDBCD /* CommSecureStore.mm */,
 				71142A7526C2650A0039DCBD /* CommSecureStoreIOSWrapper.h */,
@@ -553,6 +555,14 @@
 				CB64AA75284F4DC900460699 /* ThreadOperations.h */,
 			);
 			path = ThreadOperationsUtilities;
+			sourceTree = "<group>";
+		};
+		CBEA4A87286EEC7600DFCFF5 /* TemporalMessageStorage */ = {
+			isa = PBXGroup;
+			children = (
+				CBEA4A88286EEC9100DFCFF5 /* NonBlockingLock.h */,
+			);
+			name = TemporalMessageStorage;
 			sourceTree = "<group>";
 		};
 		CBED0E2C284E086100CD3863 /* PersistentStorageUtilities */ = {
