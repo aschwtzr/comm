@@ -1,8 +1,8 @@
 use curve25519_dalek::ristretto::RistrettoPoint;
 use opaque_ke::{errors::PakeError, keypair::KeyPair};
-use std::{env, fs, io, path::Path};
+use std::{env, fmt, fs, io, path::Path};
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Config {
   pub server_keypair: KeyPair<RistrettoPoint>,
 }
@@ -17,6 +17,14 @@ impl Config {
     Ok(Self {
       server_keypair: keypair,
     })
+  }
+}
+
+impl fmt::Debug for Config {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_struct("Config")
+      .field("server_keypair", &"redacted")
+      .finish()
   }
 }
 
