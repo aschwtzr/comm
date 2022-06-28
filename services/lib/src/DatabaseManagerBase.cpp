@@ -3,6 +3,8 @@
 #include "Item.h"
 
 #include <aws/core/utils/Outcome.h>
+#include <aws/dynamodb/model/BatchWriteItemRequest.h>
+#include <aws/dynamodb/model/BatchWriteItemResult.h>
 #include <aws/dynamodb/model/DeleteItemRequest.h>
 
 #include <iostream>
@@ -39,6 +41,31 @@ void DatabaseManagerBase::innerRemoveItem(const Item &item) {
       getDynamoDBClient()->DeleteItem(request);
   if (!outcome.IsSuccess()) {
     throw std::runtime_error(outcome.GetError().GetMessage());
+  }
+}
+
+void DatabaseManagerBase::innerBatchWriteItem(
+    const std::string &tableName,
+    std::vector<Aws::DynamoDB::Model::WriteRequest> &writeRequests) {
+  // Split write requests to chunks by MAX_DYNAMODB_BATCH_ITEMS size and write
+  // them by batch
+  Aws::DynamoDB::Model::BatchWriteItemOutcome outcome;
+  std::vector<Aws::DynamoDB::Model::WriteRequest> writeRequestsChunk;
+  std::vector<Aws::DynamoDB::Model::WriteRequest>::iterator chunkPositionStart,
+      chunkPositionEnd;
+  for (size_t i = 0; i < writeRequests.size(); i += MAX_DYNAMODB_BATCH_ITEMS) {
+    chunkPositionStart = writeRequests.begin() + i;
+    chunkPositionEnd = writeRequests.begin() +
+        std::min(writeRequests.size(), i + MAX_DYNAMODB_BATCH_ITEMS);
+    writeRequestsChunk = std::vector<Aws::DynamoDB::Model::WriteRequest>(
+        chunkPositionStart, chunkPositionEnd);
+
+    Aws::DynamoDB::Model::BatchWriteItemRequest writeBatchRequest;
+    writeBatchRequest.AddRequestItems(tableName, writeRequestsChunk);
+    outcome = getDynamoDBClient()->BatchWriteItem(writeBatchRequest);
+    if (!outcome.IsSuccess()) {
+      throw std::runtime_error(outcome.GetError().GetMessage());
+    }
   }
 }
 
