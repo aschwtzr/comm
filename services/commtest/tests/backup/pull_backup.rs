@@ -7,6 +7,7 @@ use tonic::Request;
 
 use crate::backup_utils::{
   proto::pull_backup_response::Data, proto::pull_backup_response::Data::*,
+  proto::pull_backup_response::Identity, proto::pull_backup_response::Identity::*,
   proto::PullBackupRequest, BackupServiceClient,
 };
 
@@ -45,7 +46,18 @@ pub async fn run(
   let mut current_id: String = String::new();
   while let Some(response) = inbound.message().await? {
     let response_data: Option<Data> = response.data;
-    let id = response.id;
+    let identity: Option<Identity> = response.identity;
+    let mut backup_id: Option<String> = None;
+    let mut log_id: Option<String> = None;
+    match identity {
+      Some(BackupId(bid)) => {
+        backup_id = Some(bid)
+      },
+      Some(LogId(lid)) => {
+        log_id = Some(lid)
+      },
+      None => {},
+    };
     match response_data {
       Some(CompactionChunk(chunk)) => {
         assert!(
@@ -53,7 +65,7 @@ pub async fn run(
           "invalid state, expected compaction, got {:?}",
           state
         );
-        current_id = id;
+        current_id = backup_id.expect("backup id expected but not received");
         println!(
           "compaction (id {}), pushing chunk (size: {})",
           current_id,
@@ -66,11 +78,12 @@ pub async fn run(
           state = State::Log;
         }
         assert!(state == State::Log, "invalid state, expected compaction");
-        if id != current_id {
+        let log_id = log_id.expect("log id expected but not received");
+        if log_id != current_id {
           result
             .log_items
-            .push(Item::new(id.clone(), Vec::new(), Vec::new()));
-          current_id = id.clone();
+            .push(Item::new(log_id.clone(), Vec::new(), Vec::new()));
+          current_id = log_id;
         }
         let log_items_size = result.log_items.len() - 1;
         result.log_items[log_items_size]
