@@ -3,6 +3,8 @@
 #include "Item.h"
 
 #include <aws/core/utils/Outcome.h>
+#include <aws/dynamodb/model/BatchWriteItemRequest.h>
+#include <aws/dynamodb/model/BatchWriteItemResult.h>
 #include <aws/dynamodb/model/DeleteItemRequest.h>
 
 #include <iostream>
@@ -39,6 +41,46 @@ void DatabaseManagerBase::innerRemoveItem(const Item &item) {
       getDynamoDBClient()->DeleteItem(request);
   if (!outcome.IsSuccess()) {
     throw std::runtime_error(outcome.GetError().GetMessage());
+  }
+}
+
+void DatabaseManagerBase::innerBatchWriteItem(
+    const std::string &tableName,
+    std::vector<Aws::DynamoDB::Model::WriteRequest> &writeRequests) {
+  Aws::DynamoDB::Model::BatchWriteItemOutcome outcome;
+  // We don't need to split write requests if the size is smaller or equal
+  // to MAX_DYNAMODB_BATCH_ITEMS
+  if (writeRequests.size() <= MAX_DYNAMODB_BATCH_ITEMS) {
+    Aws::DynamoDB::Model::BatchWriteItemRequest writeRequest;
+    writeRequest.AddRequestItems(tableName, writeRequests);
+    outcome = getDynamoDBClient()->BatchWriteItem(writeRequest);
+    if (!outcome.IsSuccess()) {
+      throw std::runtime_error(outcome.GetError().GetMessage());
+    }
+    return;
+  }
+  // Split write requests to chunks by MAX_DYNAMODB_BATCH_ITEMS size and write
+  // them by batch
+  std::vector<Aws::DynamoDB::Model::WriteRequest> writeRequestsChunk;
+  std::vector<Aws::DynamoDB::Model::WriteRequest>::iterator chunkPositionStart,
+      chunkPositionEnd;
+  for (int i = 0; i < writeRequests.size(); i += MAX_DYNAMODB_BATCH_ITEMS) {
+    chunkPositionStart = writeRequests.begin() + i;
+    if ((i + MAX_DYNAMODB_BATCH_ITEMS) > writeRequests.size()) {
+      chunkPositionEnd = writeRequests.end();
+    } else {
+      chunkPositionEnd = writeRequests.end() -
+          (writeRequests.size() - i - MAX_DYNAMODB_BATCH_ITEMS);
+    }
+    writeRequestsChunk = std::vector<Aws::DynamoDB::Model::WriteRequest>(
+        chunkPositionStart, chunkPositionEnd);
+
+    Aws::DynamoDB::Model::BatchWriteItemRequest writeBatchRequest;
+    writeBatchRequest.AddRequestItems(tableName, writeRequestsChunk);
+    outcome = getDynamoDBClient()->BatchWriteItem(writeBatchRequest);
+    if (!outcome.IsSuccess()) {
+      throw std::runtime_error(outcome.GetError().GetMessage());
+    }
   }
 }
 
