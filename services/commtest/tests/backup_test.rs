@@ -16,12 +16,15 @@ use bytesize::ByteSize;
 use tools::Error;
 use tools::{get_dynamo_db_item_size_limit, get_grpc_chunk_size_limit};
 
+use std::env;
+
 use backup_utils::BackupServiceClient;
 
 #[tokio::test]
 async fn backup_test() -> Result<(), Error> {
+  let port = env::var("COMM_SERVICES_PORT_BACKUP").expect("port env var expected but not received");
   let mut client =
-    BackupServiceClient::connect("http://localhost:50052").await?;
+    BackupServiceClient::connect(format!("http://localhost:{}", port)).await?;
 
   let mut backup_data = BackupData {
     user_id: "user0000".to_string(),
