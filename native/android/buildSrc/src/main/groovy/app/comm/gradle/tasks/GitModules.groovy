@@ -79,6 +79,8 @@ class GitModules extends DefaultTask {
             )
             println("Overwrite the branch for ${module} to ${branch}")
         }
+
+        def threads = []
         // Iterating the modules map
         modulesList.each { path, props ->
             // Paths and flags
@@ -98,20 +100,28 @@ class GitModules extends DefaultTask {
             cloneDir.deleteDir()
             cloneDir.mkdirs()
 
-            def command = "git clone ${branchFlag} " +
-                "--recurse-submodules ${moduleURL} ${cloneDir.getPath()}"
-            def proc = command.execute()
-            proc.waitFor()
-            // Throw an error if 'git clone' was unsuccessfull
-            if (proc.exitValue() != 0) {
+            def th = new Thread({
+              def command = "git clone ${branchFlag} " +
+                "--depth 1 --recursive --shallow-submodules -j16 ${moduleURL} ${cloneDir.getPath()}"
+              print(command)
+              def proc = command.execute()
+              proc.waitFor()
+              // Throw an error if 'git clone' was unsuccessfull
+              if (proc.exitValue() != 0) {
                 throw new GradleException(
-                    "Error while pulling ${path} submodule: ${proc.err.text}"
+                  "Error while pulling ${path} submodule: ${proc.err.text}"
                 )
-            }
-            // Remove the .git folder from submodule directory
-            def gitDir = new File("${cloneDir.getPath()}/.git")
-            gitDir.deleteDir()
+              }
+              // Remove the .git folder from submodule directory
+              def gitDir = new File("${cloneDir.getPath()}/.git")
+              gitDir.deleteDir()
+            })
+
+            threads << th
+
         }
+      threads.each { it.start() }
+      threads.each { it.join() }
     }
 
     // Run commands after the cloning process if needed

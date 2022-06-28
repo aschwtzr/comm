@@ -304,7 +304,7 @@ task prepareOpenSSL(
     into("${thirdPartyNdkDir}/openssl")
 }
 
-task prebuildOpenSSL(dependsOn: dependenciesPath ? [] : [prepareOpenSSL]) {
+task prebuildOpenSSL(dependsOn: dependenciesPath ? [] : [prepareOpenSSL, prepareGrpc, prepareBoost]) {
     inputs.properties([
         'openssl.version': OPENSSL_VERSION,
         'openssl.abis': getBuildTypeABIs(nativeArchitectures)
@@ -335,12 +335,7 @@ task prebuildOpenSSL(dependsOn: dependenciesPath ? [] : [prepareOpenSSL]) {
 
 // EXTERNAL LIBS
 task prepareExternalLibs {
-    dependsOn prepareGrpc
-    dependsOn prepareFolly
-    dependsOn prepareGlog
-    dependsOn prepareBoost
-    dependsOn prepareDoubleConversion
-    dependsOn prebuildOpenSSL
+  dependsOn([prepareGrpc, prepareFolly, prepareGlog, prepareBoost, prepareDoubleConversion, prebuildOpenSSL])
 }
 
 // Removes the '.cxx' directory to prevent running
