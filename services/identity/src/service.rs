@@ -93,26 +93,19 @@ impl IdentityService for MyIdentityService {
                 pake_registration_request_and_user_id,
               )),
           }) => {
-            if let Err(e) = tx
-              .send(
-                pake_registration_start(
-                  config.clone(),
-                  &mut OsRng,
-                  &pake_registration_request_and_user_id
-                    .pake_registration_request,
-                  num_messages_received,
-                )
-                .await
-                .map(
-                  |registration_response_and_server_registration| {
-                    server_registration =
-                      Some(registration_response_and_server_registration.1);
-                    registration_response_and_server_registration.0
-                  },
-                ),
-              )
-              .await
-            {
+            let registration_start_result = pake_registration_start(
+              config.clone(),
+              &mut OsRng,
+              &pake_registration_request_and_user_id.pake_registration_request,
+              num_messages_received,
+            )
+            .await
+            .map(|registration_response_and_server_registration| {
+              server_registration =
+                Some(registration_response_and_server_registration.1);
+              registration_response_and_server_registration.0
+            });
+            if let Err(e) = tx.send(registration_start_result).await {
               error!("Response was dropped: {}", e);
               break;
             }
@@ -125,43 +118,39 @@ impl IdentityService for MyIdentityService {
                 pake_registration_upload_and_credential_request,
               )),
           }) => {
-            if let Err(e) = tx
-              .send(
-                match pake_registration_finish(
-                  &user_id,
-                  client.clone(),
-                  &pake_registration_upload_and_credential_request
-                    .pake_registration_upload,
-                  server_registration,
-                  num_messages_received,
-                )
-                .await
-                {
-                  Ok(_) => pake_login_start(
-                    config.clone(),
-                    client.clone(),
-                    &user_id.clone(),
-                    &pake_registration_upload_and_credential_request
-                      .pake_credential_request,
-                    num_messages_received,
-                    PakeWorkflow::Registration,
-                  )
-                  .await
-                  .map(
-                    |pake_login_response_and_server_login| {
-                      server_login =
-                        Some(pake_login_response_and_server_login.1);
-                      RegistrationResponse {
-                        data: Some(PakeRegistrationLoginResponse(
-                          pake_login_response_and_server_login.0,
-                        )),
-                      }
-                    },
-                  ),
-                  Err(e) => Err(e),
-                },
+            let registration_finish_and_login_start_result =
+              match pake_registration_finish(
+                &user_id,
+                client.clone(),
+                &pake_registration_upload_and_credential_request
+                  .pake_registration_upload,
+                server_registration,
+                num_messages_received,
               )
               .await
+              {
+                Ok(_) => pake_login_start(
+                  config.clone(),
+                  client.clone(),
+                  &user_id.clone(),
+                  &pake_registration_upload_and_credential_request
+                    .pake_credential_request,
+                  num_messages_received,
+                  PakeWorkflow::Registration,
+                )
+                .await
+                .map(|pake_login_response_and_server_login| {
+                  server_login = Some(pake_login_response_and_server_login.1);
+                  RegistrationResponse {
+                    data: Some(PakeRegistrationLoginResponse(
+                      pake_login_response_and_server_login.0,
+                    )),
+                  }
+                }),
+                Err(e) => Err(e),
+              };
+            if let Err(e) =
+              tx.send(registration_finish_and_login_start_result).await
             {
               error!("Response was dropped: {}", e);
               break;
@@ -174,29 +163,21 @@ impl IdentityService for MyIdentityService {
                 pake_credential_finalization,
               )),
           }) => {
-            if let Err(e) = tx
-              .send(
-                pake_login_finish(
-                  &user_id,
-                  &device_id,
-                  client,
-                  server_login,
-                  &pake_credential_finalization,
-                  &mut OsRng,
-                  num_messages_received,
-                  PakeWorkflow::Registration,
-                )
-                .await
-                .map(|pake_login_response| {
-                  RegistrationResponse {
-                    data: Some(PakeRegistrationLoginResponse(
-                      pake_login_response,
-                    )),
-                  }
-                }),
-              )
-              .await
-            {
+            let login_finish_result = pake_login_finish(
+              &user_id,
+              &device_id,
+              client,
+              server_login,
+              &pake_credential_finalization,
+              &mut OsRng,
+              num_messages_received,
+              PakeWorkflow::Registration,
+            )
+            .await
+            .map(|pake_login_response| RegistrationResponse {
+              data: Some(PakeRegistrationLoginResponse(pake_login_response)),
+            });
+            if let Err(e) = tx.send(login_finish_result).await {
               error!("Response was dropped: {}", e);
             }
             break;
@@ -241,18 +222,14 @@ impl IdentityService for MyIdentityService {
           Ok(LoginRequest {
             data: Some(WalletLoginRequest(req)),
           }) => {
-            if let Err(e) = tx
-              .send(
-                wallet_login_helper(
-                  client,
-                  req,
-                  &mut OsRng,
-                  num_messages_received,
-                )
-                .await,
-              )
-              .await
-            {
+            let wallet_login_result = wallet_login_helper(
+              client,
+              req,
+              &mut OsRng,
+              num_messages_received,
+            )
+            .await;
+            if let Err(e) = tx.send(wallet_login_result).await {
               error!("Response was dropped: {}", e);
             }
             break;
@@ -266,28 +243,24 @@ impl IdentityService for MyIdentityService {
                   )),
               })),
           }) => {
-            if let Err(e) = tx
-              .send(
-                pake_login_start(
-                  config.clone(),
-                  client.clone(),
-                  &pake_credential_request_and_user_id.user_id,
-                  &pake_credential_request_and_user_id.pake_credential_request,
-                  num_messages_received,
-                  PakeWorkflow::Login,
-                )
-                .await
-                .map(|pake_login_response_and_server_login| {
-                  server_login = Some(pake_login_response_and_server_login.1);
-                  LoginResponse {
-                    data: Some(PakeLoginResponse(
-                      pake_login_response_and_server_login.0,
-                    )),
-                  }
-                }),
-              )
-              .await
-            {
+            let login_start_result = pake_login_start(
+              config.clone(),
+              client.clone(),
+              &pake_credential_request_and_user_id.user_id,
+              &pake_credential_request_and_user_id.pake_credential_request,
+              num_messages_received,
+              PakeWorkflow::Login,
+            )
+            .await
+            .map(|pake_login_response_and_server_login| {
+              server_login = Some(pake_login_response_and_server_login.1);
+              LoginResponse {
+                data: Some(PakeLoginResponse(
+                  pake_login_response_and_server_login.0,
+                )),
+              }
+            });
+            if let Err(e) = tx.send(login_start_result).await {
               error!("Response was dropped: {}", e);
               break;
             }
@@ -301,25 +274,21 @@ impl IdentityService for MyIdentityService {
                   Some(PakeCredentialFinalization(pake_credential_finalization)),
               })),
           }) => {
-            if let Err(e) = tx
-              .send(
-                pake_login_finish(
-                  &user_id,
-                  &device_id,
-                  client,
-                  server_login,
-                  &pake_credential_finalization,
-                  &mut OsRng,
-                  num_messages_received,
-                  PakeWorkflow::Login,
-                )
-                .await
-                .map(|pake_login_response| LoginResponse {
-                  data: Some(PakeLoginResponse(pake_login_response)),
-                }),
-              )
-              .await
-            {
+            let login_finish_result = pake_login_finish(
+              &user_id,
+              &device_id,
+              client,
+              server_login,
+              &pake_credential_finalization,
+              &mut OsRng,
+              num_messages_received,
+              PakeWorkflow::Login,
+            )
+            .await
+            .map(|pake_login_response| LoginResponse {
+              data: Some(PakeLoginResponse(pake_login_response)),
+            });
+            if let Err(e) = tx.send(login_finish_result).await {
               error!("Response was dropped: {}", e);
             }
             break;
