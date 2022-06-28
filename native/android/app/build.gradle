@@ -327,7 +327,7 @@ task prebuildOpenSSL(dependsOn: dependenciesPath ? [] : [prepareOpenSSL]) {
                 // ANDROID_NDK_HOME
                 android.ndkDirectory.absolutePath,
                 // PARALLEL_THREADS
-                Runtime.getRuntime().availableProcessors()
+                Runtime.getRuntime().availableProcessors() * 2
             }
         }
     }
