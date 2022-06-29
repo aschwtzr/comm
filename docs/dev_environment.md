@@ -595,29 +595,9 @@ cd lib
 flow
 ```
 
-## Running web app
-
-Open a new terminal and run:
-
-```
-cd web
-yarn dev
-```
-
-This will start two processes. One is `webpack-dev-server`, which will serve the JS files. `webpack-dev-server` also makes sure the website automatically hot-reloads whenever any of the source files change. The other process is `webpack --watch`, which will build the `app.build.cjs` file, as well as rebuilding it whenever any of the source files change. The `app.build.cjs` file is consumed by the Node server in order to pre-render the initial HTML from the web source (“Server-Side Rendering”).
-
-## Running landing page
-
-Open a new terminal and run:
-
-```
-cd landing
-yarn dev
-```
-
-This runs the same two processes as the web app, but for the landing page. Note that the `landing.build.cjs` file (similar to the web app’s `app.build.cjs` file) is consumed by the Node server.
-
 ## Running keyserver
+
+To run the web app, landing page, or the mobile app on the iOS Simulator or Android Emulator, you’ll need to run the keyserver.
 
 Open a new terminal and run:
 
@@ -626,15 +606,45 @@ cd keyserver
 yarn dev
 ```
 
-You should now be able to load the web app in your web browser at http://localhost/comm/, and the landing page at http://localhost/commlanding/.
-
 This command runs three processes. The first two are to keep the `dist` folder updated whenever the `src` folder changes. They are “watch” versions of the same Babel and `rsync` commands we used to initially create the `dist` folder (before running the `create-db.js` script above). The final process is `nodemon`, which is similar to `node` except that it restarts whenever any of its source files (in the `dist` directory) changes.
 
 Note that if you run `yarn dev` in `keyserver` right after `yarn cleaninstall`, before Webpack is given a chance to build `app.build.cjs`/`landing.build.cjs` files, then Node will crash when it attempts to import those files. Just make sure to run `yarn dev` (or `yarn prod`) in `web` or `landing` before attempting to load the corresponding webpages.
 
+## Running web app
+
+First, make sure that the [keyserver is running](https://github.com/CommE2E/comm/blob/master/docs/dev_environment.md#running-keyserver).
+
+Next, open a new terminal and run:
+
+```
+cd web
+yarn dev
+```
+
+You should now be able to load the web app in your web browser at http://localhost/comm/.
+
+This command will start two processes. One is `webpack-dev-server`, which will serve the JS files. `webpack-dev-server` also makes sure the website automatically hot-reloads whenever any of the source files change. The other process is `webpack --watch`, which will build the `app.build.cjs` file, as well as rebuilding it whenever any of the source files change. The `app.build.cjs` file is consumed by the Node server in order to pre-render the initial HTML from the web source (“Server-Side Rendering”).
+
+## Running landing page
+
+First, make sure that the [keyserver is running](https://github.com/CommE2E/comm/blob/master/docs/dev_environment.md#running-keyserver).
+
+Next, open a new terminal and run:
+
+```
+cd landing
+yarn dev
+```
+
+You should now be able to load the landing page in your web browser at http://localhost/commlanding/.
+
+This command runs the same two processes as the web app, but for the landing page. Note that the `landing.build.cjs` file (similar to the web app’s `app.build.cjs` file) is consumed by the Node server.
+
 ## Running mobile app on iOS Simulator
 
-First, make sure that the Metro bundler is running. If you haven’t already, open a new terminal and run:
+First, make sure that the [keyserver is running](https://github.com/CommE2E/comm/blob/master/docs/dev_environment.md#running-keyserver).
+
+Next, make sure that the Metro bundler is running. If you haven't already, open a new terminal and run:
 
 ```
 cd native
@@ -643,11 +653,13 @@ yarn dev
 
 This command runs two processes. The first is the Metro bundler, which handles bundling our app’s JavaScript code and communicating with the debug build of the app running on either a physical or virtual device. The second is the `remotedev-server` for Redux, which is a proxy of sorts through which the Redux monitor (running in the Chrome extension) can communicate with the debug build of the app.
 
-Next, open `native/ios/Comm.xcworkspace` in Xcode. Select a Simulator from the Scheme menu in the Workspace Toolbar. Then hit the Run button to build and run the project.
+Finally, open `native/ios/Comm.xcworkspace` in Xcode. Select a Simulator from the Scheme menu in the Workspace Toolbar. Then hit the Run button to build and run the project.
 
 ## Running mobile app on Android Emulator
 
-First, make sure that the Metro bundler is running. If you haven’t already, open a new terminal and run:
+First, make sure that the [keyserver is running](https://github.com/CommE2E/comm/blob/master/docs/dev_environment.md#running-keyserver).
+
+Next, make sure that the Metro bundler is running. If you haven't already, open a new terminal and run:
 
 ```
 cd native
@@ -656,7 +668,7 @@ yarn dev
 
 This command runs two processes (see previous section for details).
 
-Next, boot up an Android Emulator using Android Studio’s AVD Manager. You should have a single Android Emulator (or plugged-in device) running at one time.
+Next, boot up an Android Emulator using Android Studio’s Virtual Device Manager. You should have a single Android Emulator (or plugged-in device) running at one time.
 
 Finally, use this command to build and run the Android app:
 
