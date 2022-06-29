@@ -57,6 +57,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 #-------------------------------------------------------------------------------
 
 USER comm
+RUN mkdir -p /home/comm/app
+chown -R comm /home/comm/app
 WORKDIR /home/comm/app
 
 #-------------------------------------------------------------------------------
@@ -84,6 +86,7 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh \
 
 # Then we use nvm to install the right version of Node. We call this early so
 # Docker build caching saves us from re-downloading Node when any file changes
+RUN mkdir -p /home/comm/app/keyserver
 COPY --chown=comm keyserver/.nvmrc keyserver/
 COPY --chown=comm keyserver/bash/source-nvm.sh keyserver/bash/
 RUN cd keyserver && . bash/source-nvm.sh
