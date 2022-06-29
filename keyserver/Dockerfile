@@ -57,6 +57,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 #-------------------------------------------------------------------------------
 
 USER comm
+RUN mkdir -p /home/comm/app
 WORKDIR /home/comm/app
 
 #-------------------------------------------------------------------------------
