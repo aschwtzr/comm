@@ -57,6 +57,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 #-------------------------------------------------------------------------------
 
 USER comm
+RUN mkdir -p /home/comm/app
+RUN chown -R comm /home/comm/app
 WORKDIR /home/comm/app
 
 #-------------------------------------------------------------------------------
@@ -84,8 +86,9 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh \
 
 # Then we use nvm to install the right version of Node. We call this early so
 # Docker build caching saves us from re-downloading Node when any file changes
-COPY --chown=comm keyserver/.nvmrc keyserver/
-COPY --chown=comm keyserver/bash/source-nvm.sh keyserver/bash/
+RUN mkdir -p /home/comm/app/keyserver
+COPY keyserver/.nvmrc keyserver/
+COPY keyserver/bash/source-nvm.sh keyserver/bash/
 RUN cd keyserver && . bash/source-nvm.sh
 
 #-------------------------------------------------------------------------------
@@ -94,17 +97,17 @@ RUN cd keyserver && . bash/source-nvm.sh
 #-------------------------------------------------------------------------------
 
 # Copy in package.json and yarn.lock files
-COPY --chown=comm package.json yarn.lock .
-COPY --chown=comm keyserver/package.json keyserver/.flowconfig keyserver/
-COPY --chown=comm lib/package.json lib/.flowconfig lib/
-COPY --chown=comm web/package.json web/.flowconfig web/
-COPY --chown=comm native/package.json native/.flowconfig native/
-COPY --chown=comm landing/package.json landing/.flowconfig landing/
+COPY package.json yarn.lock .
+COPY keyserver/package.json keyserver/.flowconfig keyserver/
+COPY lib/package.json lib/.flowconfig lib/
+COPY web/package.json web/.flowconfig web/
+COPY native/package.json native/.flowconfig native/
+COPY landing/package.json landing/.flowconfig landing/
 
 # Copy in files needed for patch-package and pod-patch
-COPY --chown=comm patches patches/
-COPY --chown=comm native/ios/pod-patch native/ios/pod-patch/
-COPY --chown=comm native/ios/Podfile native/ios/
+COPY patches patches/
+COPY native/ios/pod-patch native/ios/pod-patch/
+COPY native/ios/Podfile native/ios/
 
 # Actually run yarn
 RUN yarn cleaninstall
