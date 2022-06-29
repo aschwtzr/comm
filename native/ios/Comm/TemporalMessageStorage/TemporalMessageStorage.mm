@@ -46,4 +46,40 @@ int const randomFilesNumberThreshold = 20;
   return self;
 }
 
+- (void)writeMessage:(NSString *)message {
+  if ([message containsString:encryptedDataSeparator]) {
+    comm::Logger::log(
+        "Messages containing separator not allowed. Skipping notification.");
+    return;
+  }
+
+  if (![NSFileManager.defaultManager fileExistsAtPath:self.mainStoragePath]) {
+    comm::Logger::log("Store not existing yet. Skipping notification");
+    return;
+  }
+
+  NSError *err = nil;
+  NonBlockingLock *lock = [[NonBlockingLock alloc] initWithName:self.lockName];
+  BOOL acquired = [lock tryAcquireLock:&err];
+  if (!acquired) {
+    NSString *randomPath =
+        [self.directoryURL URLByAppendingPathComponent:[NSUUID UUID].UUIDString]
+            .path;
+    [EncryptedFileUtils writeData:message toFileAtPath:randomPath error:nil];
+    comm::Logger::log(
+        "Failed to acquire lock. Details: " +
+        std::string([err.localizedDescription UTF8String]));
+    return;
+  }
+  [EncryptedFileUtils appendData:message
+                    toFileAtPath:self.mainStoragePath
+                           error:&err];
+  [lock releaseLock:nil];
+  if (err) {
+    comm::Logger::log(
+        "Failed to append message to storage. Details: " +
+        std::string([err.localizedDescription UTF8String]));
+  }
+}
+
 @end
