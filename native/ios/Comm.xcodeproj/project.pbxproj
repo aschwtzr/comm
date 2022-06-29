@@ -67,6 +67,8 @@
 		CBEA4A8B286EED0400DFCFF5 /* NonBlockingLock.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A89286EECCC00DFCFF5 /* NonBlockingLock.mm */; };
 		CBEA4A8E286EED6A00DFCFF5 /* EncryptedFileUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A8D286EED6A00DFCFF5 /* EncryptedFileUtils.mm */; };
 		CBEA4A8F286EED8000DFCFF5 /* EncryptedFileUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A8D286EED6A00DFCFF5 /* EncryptedFileUtils.mm */; };
+		CBEA4A92286EEDD300DFCFF5 /* TemporalMessageStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A91286EEDD300DFCFF5 /* TemporalMessageStorage.mm */; };
+		CBEA4A93286EEDE000DFCFF5 /* TemporalMessageStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = CBEA4A91286EEDD300DFCFF5 /* TemporalMessageStorage.mm */; };
 		D7DB6E0F85B2DBE15B01EC21 /* libPods-Comm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 994BEBDD4E4959F69CEA0BC3 /* libPods-Comm.a */; };
 		F02C296C528B51ADAB5AA19D /* libPods-NotificationService.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3EE4DCB430B05EC9DE7D7B01 /* libPods-NotificationService.a */; };
 /* End PBXBuildFile section */
@@ -217,6 +219,7 @@
 		CBEA4A8C286EED3900DFCFF5 /* EncryptedFileUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EncryptedFileUtils.h; path = Comm/TemporalMessageStorage/EncryptedFileUtils.h; sourceTree = "<group>"; };
 		CBEA4A8D286EED6A00DFCFF5 /* EncryptedFileUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EncryptedFileUtils.mm; path = Comm/TemporalMessageStorage/EncryptedFileUtils.mm; sourceTree = "<group>"; };
 		CBEA4A90286EEDAE00DFCFF5 /* TemporalMessageStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporalMessageStorage.h; path = Comm/TemporalMessageStorage/TemporalMessageStorage.h; sourceTree = "<group>"; };
+		CBEA4A91286EEDD300DFCFF5 /* TemporalMessageStorage.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = TemporalMessageStorage.mm; path = Comm/TemporalMessageStorage/TemporalMessageStorage.mm; sourceTree = "<group>"; };
 		F53DA7B3F26C2798DCE74A94 /* Pods-Comm.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Comm.debug.xcconfig"; path = "Target Support Files/Pods-Comm/Pods-Comm.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -568,6 +571,7 @@
 		CBEA4A87286EEC7600DFCFF5 /* TemporalMessageStorage */ = {
 			isa = PBXGroup;
 			children = (
+				CBEA4A91286EEDD300DFCFF5 /* TemporalMessageStorage.mm */,
 				CBEA4A90286EEDAE00DFCFF5 /* TemporalMessageStorage.h */,
 				CBEA4A8D286EED6A00DFCFF5 /* EncryptedFileUtils.mm */,
 				CBEA4A8C286EED3900DFCFF5 /* EncryptedFileUtils.h */,
@@ -943,6 +947,7 @@
 				CBEA4A8E286EED6A00DFCFF5 /* EncryptedFileUtils.mm in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				71142A7726C2650B0039DCBD /* CommSecureStoreIOSWrapper.mm in Sources */,
+				CBEA4A92286EEDD300DFCFF5 /* TemporalMessageStorage.mm in Sources */,
 				CB38F2B1286C6C870010535C /* MessageOperationsUtilities.cpp in Sources */,
 				71BE84492636A944002849D2 /* NativeModules.cpp in Sources */,
 				71CA4A64262DA8E500835C89 /* Logger.mm in Sources */,
@@ -971,6 +976,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CBEA4A93286EEDE000DFCFF5 /* TemporalMessageStorage.mm in Sources */,
 				CBEA4A8F286EED8000DFCFF5 /* EncryptedFileUtils.mm in Sources */,
 				CBEA4A8B286EED0400DFCFF5 /* NonBlockingLock.mm in Sources */,
 				CB38F2C0286C6CDF0010535C /* MessageOperationsUtilities.cpp in Sources */,
