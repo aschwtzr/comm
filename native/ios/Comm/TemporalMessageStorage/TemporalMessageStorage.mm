@@ -139,4 +139,19 @@ int const randomFilesNumberThreshold = 20;
   return allMessages;
 }
 
+- (void)ensureLockUsable {
+  NSArray<NSString *> *storageContents =
+      [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.directoryPath
+                                                        error:nil];
+  NSError *err = nil;
+  if (storageContents.count > randomFilesNumberThreshold) {
+    [[[NonBlockingLock alloc] initWithName:self.lockName] destroyLock:&err];
+  }
+  if (err) {
+    comm::Logger::log(
+        "Failed to delete lock. Details: " +
+        std::string([err.localizedDescription UTF8String]));
+  }
+}
+
 @end
