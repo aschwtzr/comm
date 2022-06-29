@@ -50,6 +50,12 @@
 		CB38F2C0286C6CDF0010535C /* MessageOperationsUtilities.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CB38F2AF286C6C870010535C /* MessageOperationsUtilities.cpp */; };
 		CB3C621127CE4A320054F24C /* Logger.mm in Sources */ = {isa = PBXBuildFile; fileRef = 71CA4A63262DA8E500835C89 /* Logger.mm */; };
 		CB3C621227CE65030054F24C /* CommSecureStoreIOSWrapper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 71142A7626C2650A0039DCBD /* CommSecureStoreIOSWrapper.mm */; };
+		CB3E6088286C7DF7008E5E39 /* EncryptedFileUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = CB3E6083286C7DF7008E5E39 /* EncryptedFileUtils.mm */; };
+		CB3E6089286C7DF7008E5E39 /* TemporalMessageStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = CB3E6085286C7DF7008E5E39 /* TemporalMessageStorage.mm */; };
+		CB3E608A286C7DF7008E5E39 /* NonBlockingLock.mm in Sources */ = {isa = PBXBuildFile; fileRef = CB3E6086286C7DF7008E5E39 /* NonBlockingLock.mm */; };
+		CB3E608B286C7E23008E5E39 /* EncryptedFileUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = CB3E6083286C7DF7008E5E39 /* EncryptedFileUtils.mm */; };
+		CB3E608C286C7E23008E5E39 /* NonBlockingLock.mm in Sources */ = {isa = PBXBuildFile; fileRef = CB3E6086286C7DF7008E5E39 /* NonBlockingLock.mm */; };
+		CB3E608D286C7E23008E5E39 /* TemporalMessageStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = CB3E6085286C7DF7008E5E39 /* TemporalMessageStorage.mm */; };
 		CB4821A527CF9F38001AB7E1 /* CommSecureStore.mm in Sources */ = {isa = PBXBuildFile; fileRef = 71D4D7CB26C50B1000FCDBCD /* CommSecureStore.mm */; };
 		CB4821A627CFB153001AB7E1 /* Client.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 71009A7926FDCD71002C8453 /* Client.cpp */; };
 		CB4821A827CFB153001AB7E1 /* tunnelbroker.grpc.pb.cc in Sources */ = {isa = PBXBuildFile; fileRef = 71009A7526FDCA67002C8453 /* tunnelbroker.grpc.pb.cc */; };
@@ -206,6 +212,12 @@
 		CB38F2BE286C6C980010535C /* DeleteEntryMessageSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DeleteEntryMessageSpec.h; path = PersistentStorageUtilities/MessageOperationsUtilities/MessageSpecs/DeleteEntryMessageSpec.h; sourceTree = "<group>"; };
 		CB38F2BF286C6C980010535C /* UpdateRelationshipMessageSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UpdateRelationshipMessageSpec.h; path = PersistentStorageUtilities/MessageOperationsUtilities/MessageSpecs/UpdateRelationshipMessageSpec.h; sourceTree = "<group>"; };
 		CB3C621327CE66540054F24C /* libEXSecureStore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libEXSecureStore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		CB3E6082286C7DF7008E5E39 /* TemporalMessageStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TemporalMessageStorage.h; path = Comm/TemporalMessageStorage/TemporalMessageStorage.h; sourceTree = "<group>"; };
+		CB3E6083286C7DF7008E5E39 /* EncryptedFileUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = EncryptedFileUtils.mm; path = Comm/TemporalMessageStorage/EncryptedFileUtils.mm; sourceTree = "<group>"; };
+		CB3E6084286C7DF7008E5E39 /* NonBlockingLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NonBlockingLock.h; path = Comm/TemporalMessageStorage/NonBlockingLock.h; sourceTree = "<group>"; };
+		CB3E6085286C7DF7008E5E39 /* TemporalMessageStorage.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = TemporalMessageStorage.mm; path = Comm/TemporalMessageStorage/TemporalMessageStorage.mm; sourceTree = "<group>"; };
+		CB3E6086286C7DF7008E5E39 /* NonBlockingLock.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = NonBlockingLock.mm; path = Comm/TemporalMessageStorage/NonBlockingLock.mm; sourceTree = "<group>"; };
+		CB3E6087286C7DF7008E5E39 /* EncryptedFileUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = EncryptedFileUtils.h; path = Comm/TemporalMessageStorage/EncryptedFileUtils.h; sourceTree = "<group>"; };
 		CB64AA74284F4DC900460699 /* ThreadOperations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadOperations.cpp; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.cpp; sourceTree = "<group>"; };
 		CB64AA75284F4DC900460699 /* ThreadOperations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadOperations.h; path = ../PersistentStorageUtilities/ThreadOperationsUtilities/ThreadOperations.h; sourceTree = "<group>"; };
 		F53DA7B3F26C2798DCE74A94 /* Pods-Comm.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Comm.debug.xcconfig"; path = "Target Support Files/Pods-Comm/Pods-Comm.debug.xcconfig"; sourceTree = "<group>"; };
@@ -318,6 +330,7 @@
 		71B8CCB626BD30EC0040C0A2 /* CommCoreImplementations */ = {
 			isa = PBXGroup;
 			children = (
+				CB3E6081286C7DD6008E5E39 /* TemporalMessageStorage */,
 				71762A74270D8AAE00F565ED /* PlatformSpecificTools.mm */,
 				71D4D7CB26C50B1000FCDBCD /* CommSecureStore.mm */,
 				71142A7526C2650A0039DCBD /* CommSecureStoreIOSWrapper.h */,
@@ -544,6 +557,19 @@
 				CB38F2BF286C6C980010535C /* UpdateRelationshipMessageSpec.h */,
 			);
 			name = MessageSpecs;
+			sourceTree = "<group>";
+		};
+		CB3E6081286C7DD6008E5E39 /* TemporalMessageStorage */ = {
+			isa = PBXGroup;
+			children = (
+				CB3E6087286C7DF7008E5E39 /* EncryptedFileUtils.h */,
+				CB3E6083286C7DF7008E5E39 /* EncryptedFileUtils.mm */,
+				CB3E6084286C7DF7008E5E39 /* NonBlockingLock.h */,
+				CB3E6086286C7DF7008E5E39 /* NonBlockingLock.mm */,
+				CB3E6082286C7DF7008E5E39 /* TemporalMessageStorage.h */,
+				CB3E6085286C7DF7008E5E39 /* TemporalMessageStorage.mm */,
+			);
+			name = TemporalMessageStorage;
 			sourceTree = "<group>";
 		};
 		CB64AA73284F4D4C00460699 /* ThreadOperationsUtilities */ = {
@@ -915,16 +941,19 @@
 				71009A7B26FDCD72002C8453 /* Client.cpp in Sources */,
 				71762A75270D8AAE00F565ED /* PlatformSpecificTools.mm in Sources */,
 				71BF5B7126B3FF0900EDE27D /* Session.cpp in Sources */,
+				CB3E6089286C7DF7008E5E39 /* TemporalMessageStorage.mm in Sources */,
 				71009A7726FDCA67002C8453 /* tunnelbroker.pb.cc in Sources */,
 				726E5D752731A4790032361D /* NetworkModule.cpp in Sources */,
 				71BF5B7526B401D300EDE27D /* Tools.cpp in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				CB3E6088286C7DF7008E5E39 /* EncryptedFileUtils.mm in Sources */,
 				71142A7726C2650B0039DCBD /* CommSecureStoreIOSWrapper.mm in Sources */,
 				CB38F2B1286C6C870010535C /* MessageOperationsUtilities.cpp in Sources */,
 				71BE84492636A944002849D2 /* NativeModules.cpp in Sources */,
 				71CA4A64262DA8E500835C89 /* Logger.mm in Sources */,
 				71BF5B7F26BBDD7400EDE27D /* CryptoModule.cpp in Sources */,
 				71BE844A2636A944002849D2 /* CommCoreModule.cpp in Sources */,
+				CB3E608A286C7DF7008E5E39 /* NonBlockingLock.mm in Sources */,
 				71D4D7CC26C50B1000FCDBCD /* CommSecureStore.mm in Sources */,
 				CB64AA76284F4DC900460699 /* ThreadOperations.cpp in Sources */,
 				711B408425DA97F9005F8F06 /* dummy.swift in Sources */,
@@ -947,6 +976,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CB3E608B286C7E23008E5E39 /* EncryptedFileUtils.mm in Sources */,
+				CB3E608C286C7E23008E5E39 /* NonBlockingLock.mm in Sources */,
+				CB3E608D286C7E23008E5E39 /* TemporalMessageStorage.mm in Sources */,
 				CB38F2C0286C6CDF0010535C /* MessageOperationsUtilities.cpp in Sources */,
 				CB1648AF27CFBE6A00394D9D /* CryptoModule.cpp in Sources */,
 				CB1648AD27CFBBBB00394D9D /* ClientGetReadReactor.cpp in Sources */,
