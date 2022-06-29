@@ -82,4 +82,61 @@ int const randomFilesNumberThreshold = 20;
   }
 }
 
+- (NSArray<NSString *> *)readAndClearMessages {
+  NSArray<NSString *> *storageContents =
+      [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.directoryPath
+                                                        error:nil];
+  NSError *lockErr = nil;
+  NonBlockingLock *lock = [[NonBlockingLock alloc] initWithName:self.lockName];
+
+  NSMutableArray<NSString *> *allMessages = [NSMutableArray array];
+
+  for (NSString *fileName in storageContents) {
+    NSString *path =
+        [self.directoryURL URLByAppendingPathComponent:fileName].path;
+
+    NSString *fileContent = nil;
+    NSError *fileReadErr = nil;
+    NSError *fileClearErr = nil;
+
+    if (![path isEqualToString:self.mainStoragePath]) {
+      fileContent = [EncryptedFileUtils readFromFileAtPath:path
+                                                     error:&fileReadErr];
+      [NSFileManager.defaultManager removeItemAtPath:path error:nil];
+    } else if ([lock tryAcquireLock:&lockErr]) {
+      fileContent = [EncryptedFileUtils readFromFileAtPath:path
+                                                     error:&fileReadErr];
+      [EncryptedFileUtils clearContentAtPath:path error:&fileClearErr];
+      [lock releaseLock:nil];
+    } else {
+      fileContent = [EncryptedFileUtils readFromFileAtPath:path
+                                                     error:&fileReadErr];
+    }
+    if (lockErr) {
+      comm::Logger::log(
+          "Failed to acquire lock. Details: " +
+          std::string([lockErr.localizedDescription UTF8String]));
+    }
+    if (fileClearErr) {
+      comm::Logger::log(
+          "Failed to clear file at path: " + std::string([path UTF8String]) +
+          "Details: " +
+          std::string([fileReadErr.localizedDescription UTF8String]));
+    }
+    if (fileReadErr) {
+      comm::Logger::log(
+          "Failed to read file at path: " + std::string([path UTF8String]) +
+          "Details: " +
+          std::string([fileReadErr.localizedDescription UTF8String]));
+      continue;
+    }
+
+    NSArray<NSString *> *fileMessages =
+        [fileContent componentsSeparatedByString:encryptedDataSeparator];
+    [allMessages addObjectsFromArray:fileMessages];
+  }
+  [allMessages removeObject:@""];
+  return allMessages;
+}
+
 @end
