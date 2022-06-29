@@ -141,4 +141,13 @@ NSString *const messageSeparator = @"\n";
   return allMessages;
 }
 
+- (void)ensureLockUsable {
+  NSArray<NSString *> *storageContents =
+      [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.directoryPath
+                                                        error:nil];
+  if (storageContents.count > randomFilesNumberThreshold) {
+    [[[NonBlockingLock alloc] initWithName:self.lockName] destroyLock:nil];
+  }
+}
+
 @end
