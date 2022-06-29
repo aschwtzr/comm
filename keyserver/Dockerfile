@@ -56,6 +56,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 # Create another user to run the rest of the commands
 #-------------------------------------------------------------------------------
 
+RUN useradd -m comm
 USER comm
 WORKDIR /home/comm/app
 
