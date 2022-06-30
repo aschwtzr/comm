@@ -758,6 +758,10 @@ yarn dev
 
 Then, from the `keyserver` directory, run `yarn script dist/scripts/name.js`, where `name.js` is the file containing the script.
 
+## Creating a new user
+
+To create a new user, run the keyserver and the mobile app on iOS simulator, and then select "Sign Up" on the app. When you sign up, a new user will be created in your local MySQL instance. You can then log in on any device connected to your local keyserver.
+
 ## Codegen
 
 We use a couple of tools that automatically generate code. There is always a source of truth – usually some file(s) with schemas.
