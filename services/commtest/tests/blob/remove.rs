@@ -3,10 +3,9 @@ mod blob_utils;
 #[path = "../lib/tools.rs"]
 mod tools;
 
-use crate::blob_utils::{proto::RemoveRequest, BlobData, BlobServiceClient};
-
 use tonic::Request;
 
+use crate::blob_utils::{proto::RemoveRequest, BlobData, BlobServiceClient};
 use crate::tools::Error;
 
 pub async fn run(
