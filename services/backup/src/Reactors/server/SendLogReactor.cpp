@@ -131,16 +131,23 @@ SendLogReactor::readRequest(backup::SendLogRequest request) {
 
 void SendLogReactor::terminateCallback() {
   const std::lock_guard<std::mutex> lock(this->reactorStateMutex);
+  
+  if (!this->getStatusHolder()->getStatus().ok()) {
+    throw std::runtime_error(this->getStatusHolder()->getStatus().error_message());
+  }
 
-  if (this->persistenceMethod == PersistenceMethod::DB ||
+  if (this->persistenceMethod != PersistenceMethod::BLOB ||
       this->putReactor == nullptr) {
+    this->persistenceMethod = PersistenceMethod::DB;
+    this->storeInDatabase();
     return;
   }
   this->putReactor->scheduleSendingDataChunk(std::make_unique<std::string>(""));
   std::unique_lock<std::mutex> lockPut(this->blobPutDoneCVMutex);
   if (this->putReactor->getStatusHolder()->state != ReactorState::DONE) {
     this->blobPutDoneCV.wait(lockPut);
-  } else if (!this->putReactor->getStatusHolder()->getStatus().ok()) {
+  }
+  if (!this->putReactor->getStatusHolder()->getStatus().ok()) {
     throw std::runtime_error(
         this->putReactor->getStatusHolder()->getStatus().error_message());
   }
