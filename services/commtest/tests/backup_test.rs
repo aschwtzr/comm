@@ -21,7 +21,8 @@ use backup_utils::BackupServiceClient;
 
 #[tokio::test]
 async fn backup_test() -> Result<(), Error> {
-  let port = env::var("COMM_SERVICES_PORT_BACKUP").expect("port env var expected but not received");
+  let port = env::var("COMM_SERVICES_PORT_BACKUP")
+    .expect("port env var expected but not received");
   let mut client =
     BackupServiceClient::connect(format!("http://localhost:{}", port)).await?;
 
@@ -45,15 +46,25 @@ async fn backup_test() -> Result<(), Error> {
       // In this case its data should be moved to the S3
       Item::new(
         String::new(),
-        vec![tools::get_dynamo_db_item_size_limit() - ByteSize::b(attachments_fill_size/2).as_u64() as usize],
+        vec![
+          tools::get_dynamo_db_item_size_limit()
+            - ByteSize::b(attachments_fill_size / 2).as_u64() as usize,
+        ],
         vec!["holder0".to_string(), "holder1".to_string()],
       ),
       // just a small item
-      Item::new(String::new(), vec![ByteSize::b(100).as_u64() as usize], vec!["holder0".to_string()]),
+      Item::new(
+        String::new(),
+        vec![ByteSize::b(100).as_u64() as usize],
+        vec!["holder0".to_string()],
+      ),
       // a big item that should be placed in the S3 right away
       Item::new(
         String::new(),
-        vec![tools::get_grpc_chunk_size_limit(), tools::get_grpc_chunk_size_limit()],
+        vec![
+          tools::get_grpc_chunk_size_limit(),
+          tools::get_grpc_chunk_size_limit(),
+        ],
         vec![
           "holder0".to_string(),
           "holder1".to_string(),
@@ -100,8 +111,7 @@ async fn backup_test() -> Result<(), Error> {
   assert_eq!(
     expected, from_result,
     "number of logs do not match, expected {}, got {}",
-    expected,
-    from_result
+    expected, from_result
   );
 
   // check log sizes
@@ -111,9 +121,7 @@ async fn backup_test() -> Result<(), Error> {
     assert_eq!(
       from_result, expected,
       "log number {} sizes do not match, expected {}, got {}",
-      i,
-      expected,
-      from_result
+      i, expected, from_result
     );
   }
 
