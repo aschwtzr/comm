@@ -23,7 +23,6 @@ import { firstLine } from 'lib/utils/string-utils';
 import Button from '../../../components/button.react';
 import LoadingIndicator from '../../../loading-indicator.react';
 import Input from '../../input.react';
-import { useModalContext } from '../../modal-provider.react';
 import ColorSelector from '../color-selector.react';
 import css from './thread-settings-general-tab.css';
 
@@ -47,7 +46,6 @@ function ThreadSettingsGeneralTab(
     setErrorMessage,
   } = props;
 
-  const modalContext = useModalContext();
   const dispatchActionPromise = useDispatchActionPromise();
   const callChangeThreadSettings = useServerCall(changeThreadSettings);
 
@@ -104,12 +102,10 @@ function ThreadSettingsGeneralTab(
 
   const changeThreadSettingsAction = React.useCallback(async () => {
     try {
-      const response = await callChangeThreadSettings({
+      return await callChangeThreadSettings({
         threadID: threadInfo.id,
         changes: queuedChanges,
       });
-      modalContext.popModal();
-      return response;
     } catch (e) {
       setErrorMessage('unknown_error');
       setQueuedChanges(Object.freeze({}));
@@ -117,7 +113,6 @@ function ThreadSettingsGeneralTab(
     }
   }, [
     callChangeThreadSettings,
-    modalContext,
     queuedChanges,
     setErrorMessage,
     setQueuedChanges,
