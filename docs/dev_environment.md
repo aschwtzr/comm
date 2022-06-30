@@ -702,7 +702,7 @@ cd native
 yarn dev
 ```
 
-This command runs the Metro bundler and `remotedev-server` for Redux (see the “Running mobile app on iOS simulator” section for more details).
+This command runs the Metro bundler and `remotedev-server` for Redux (see the “Running mobile app on iOS Simulator” section for more details).
 
 You should finally be ready to build and deploy the app in Xcode! Select your physical device from ”run destinations” in the Workspace Toolbar. Then hit the Run button to build and run the project.
 
@@ -757,6 +757,10 @@ yarn dev
 ```
 
 Then, from the `keyserver` directory, run `yarn script dist/scripts/name.js`, where `name.js` is the file containing the script.
+
+## Creating a new user
+
+To create a new user, [run the keyserver](#running-keyserver) and the [mobile app on iOS Simulator](#running-mobile-app-on-ios-simulator), and then select ”Sign Up” in the app. When you sign up, a new user will be created on your local MySQL instance. You can then log in on any device connected to your local keyserver.
 
 ## Codegen
 
