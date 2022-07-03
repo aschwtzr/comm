@@ -20,6 +20,7 @@
       # package set
       pkgsForSystem = system: import nixpkgs {
         inherit overlays system;
+        config.android_sdk.accept_license = true;
       };
 
     # utils.lib.eachSystem helps create a result set of expected flake outputs

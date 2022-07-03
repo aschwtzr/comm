@@ -15,7 +15,10 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(PACKAGE_NAME "comm_jni_module")
 
-find_package(fbjni REQUIRED CONFIG)
+find_package(fbjni
+  NAMES fbjni fbjniLibrary
+  REQUIRED CONFIG
+)
 
 set(BUILD_TESTING OFF)
 set(HAVE_SYMBOLIZE OFF)
@@ -41,6 +44,9 @@ add_subdirectory(./build/third-party-ndk/grpc/grpc-${GRPC_VERSION}/ ${CMAKE_CURR
 add_subdirectory(./build/third-party-ndk/glog/glog-${GLOG_VERSION}/)
 add_subdirectory(../../node_modules/olm ./build)
 
+# Common Comm Cpp projects
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../native/cpp ${CMAKE_CURRENT_BINARY_DIR}/cpp)
+
 include_directories(
   ../../node_modules/react-native/React
   ../../node_modules/react-native/React/Base
@@ -55,9 +61,6 @@ include_directories(
   # SQLCipher amalgamation
   ../../node_modules/@commapp/sqlcipher-amalgamation/src
 
-  # SQLite ORM
-  ../../cpp/lib/sqlite_orm
-
   # symlinked React Native headers
   ../headers
 
@@ -68,18 +71,6 @@ include_directories(
 
   # comm android specific code
   ./src/cpp
-
-  # comm native mutual code
-  ../../cpp/CommonCpp/NativeModules
-  ../../cpp/CommonCpp/NativeModules/InternalModules
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities/ThreadOperationsUtilities
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities/MessageOperationsUtilities
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities/MessageOperationsUtilities/MessageSpecs
-  ../../cpp/CommonCpp/DatabaseManagers
-  ../../cpp/CommonCpp/Tools
-  ../../cpp/CommonCpp/grpc/_generated
-  ../../cpp/CommonCpp/grpc
 )
 
 # search for all cpp files in this directory
@@ -102,7 +93,17 @@ add_library(
   ../../node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon/TurboModule.cpp
   ../../node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon/LongLivedObject.cpp
   ../../node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon/TurboModuleUtils.cpp
-  
+
+  # Comm
+  comm-modules
+  comm-databasemanagers
+  comm-tools
+  comm-grpc
+  comm-backup
+  comm-blob
+  comm-tunnelbroker
+  comm-sqlite-orm
+
   # SQLCipher
   ${SQLCIPHER}
 
