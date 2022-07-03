@@ -33,6 +33,7 @@ stdenv.mkDerivation rec {
   # They install the target export in the wrong directory
   postInstall = ''
     mv $out/share/cmake $out/lib/cmake
+    rm -r $out/share
   '';
 
   meta = with lib; {
