@@ -21,6 +21,7 @@ set(DBM_SRCS
   )
 
 add_library(comm-databasemanagers
+  STATIC
   ${DBM_HDRS}
   ${DBM_SRCS}
 )

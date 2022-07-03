@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.4)
 
 include(GNUInstallDirs)
 
-find_package(Folly REQUIRED)
+find_package(Folly)
 
 set(TOOLS_HDRS
   "CommSecureStore.h"
@@ -17,6 +17,7 @@ set(TOOLS_SRCS
   )
 
 add_library(comm-tools
+  STATIC
   ${TOOLS_HDRS}
   ${TOOLS_SRCS}
 )

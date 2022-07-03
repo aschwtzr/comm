@@ -15,7 +15,23 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(PACKAGE_NAME "comm_jni_module")
 
-find_package(fbjni REQUIRED CONFIG)
+find_package(fbjni
+  NAMES fbjni fbjniLibrary
+  REQUIRED CONFIG
+)
+
+# Allow for CMake build to run without invoking through gradle
+file(STRINGS ${CMAKE_SOURCE_DIR}/../gradle.properties ConfigContents)
+foreach(NameAndValue ${ConfigContents})
+  # Strip leading spaces
+  string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
+  # Find variable name
+  string(REGEX MATCH "^[^=]+" Name ${NameAndValue})
+  # Find the value
+  string(REPLACE "${Name}=" "" Value ${NameAndValue})
+  # Set the variable
+  set(${Name} "${Value}")
+endforeach()
 
 set(BUILD_TESTING OFF)
 set(HAVE_SYMBOLIZE OFF)
@@ -37,9 +53,15 @@ set(gRPC_BUILD_GRPC_CSHARP_PLUGIN OFF)
 set(OPENSSL_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/build/third-party-ndk/openssl/openssl-${OPENSSL_VERSION}/build/${CMAKE_ANDROID_ARCH_ABI}")
 list(APPEND CMAKE_FIND_ROOT_PATH "${OPENSSL_ROOT_DIR}")
 
-add_subdirectory(./build/third-party-ndk/grpc/grpc-${GRPC_VERSION}/ ${CMAKE_CURRENT_BINARY_DIR}/grpc/ EXCLUDE_FROM_ALL)
-add_subdirectory(./build/third-party-ndk/glog/glog-${GLOG_VERSION}/)
+add_subdirectory(${CMAKE_SOURCE_DIR}/build/third-party-ndk/grpc/grpc-${GRPC_VERSION}/ ${CMAKE_CURRENT_BINARY_DIR}/grpc/ EXCLUDE_FROM_ALL)
+add_subdirectory(${CMAKE_SOURCE_DIR}/build/third-party-ndk/glog/glog-${GLOG_VERSION}/)
 add_subdirectory(../../node_modules/olm ./build)
+
+# Common Comm Cpp projects
+add_subdirectory(
+  ${CMAKE_CURRENT_SOURCE_DIR}/../../../native/cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/cpp
+)
 
 include_directories(
   ../../node_modules/react-native/React
@@ -55,9 +77,6 @@ include_directories(
   # SQLCipher amalgamation
   ../../node_modules/@commapp/sqlcipher-amalgamation/src
 
-  # SQLite ORM
-  ../../cpp/lib/sqlite_orm
-
   # symlinked React Native headers
   ../headers
 
@@ -69,25 +88,14 @@ include_directories(
   # comm android specific code
   ./src/cpp
 
-  # comm native mutual code
-  ../../cpp/CommonCpp/NativeModules
-  ../../cpp/CommonCpp/NativeModules/InternalModules
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities/ThreadOperationsUtilities
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities/MessageOperationsUtilities
-  ../../cpp/CommonCpp/NativeModules/PersistentStorageUtilities/MessageOperationsUtilities/MessageSpecs
-  ../../cpp/CommonCpp/DatabaseManagers
-  ../../cpp/CommonCpp/Tools
-  ../../cpp/CommonCpp/grpc/_generated
-  ../../cpp/CommonCpp/grpc
+  # Android ndk headers
+  ${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/
 )
 
 # search for all cpp files in this directory
 file(GLOB SQLCIPHER "../../node_modules/@commapp/sqlcipher-amalgamation/src/*.c")
-file(GLOB_RECURSE COMMON_NATIVE_CODE "../../cpp/CommonCpp/**/*.cpp")
 file(GLOB ANDROID_NATIVE_CODE "./src/cpp/*.cpp")
 file(GLOB DOUBLE_CONVERSION_SOURCES "./build/third-party-ndk/double-conversion/double-conversion/*.cc")
-file(GLOB GRPC_CODE "../../cpp/CommonCpp/grpc/_generated/*.cc")
 
 add_library(
   # Sets the name of the library.
@@ -102,7 +110,7 @@ add_library(
   ../../node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon/TurboModule.cpp
   ../../node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon/LongLivedObject.cpp
   ../../node_modules/react-native/ReactCommon/react/nativemodule/core/ReactCommon/TurboModuleUtils.cpp
-  
+
   # SQLCipher
   ${SQLCIPHER}
 
@@ -132,11 +140,8 @@ add_library(
   # double-conversion
   ${DOUBLE_CONVERSION_SOURCES}
 
-  ${GRPC_CODE}
-
   # comm code
   ${ANDROID_NATIVE_CODE}
-  ${COMMON_NATIVE_CODE}
 )
 
 add_definitions(
@@ -144,7 +149,6 @@ add_definitions(
   -DFOLLY_NO_CONFIG=1
   -DFOLLY_HAVE_CLOCK_GETTIME=1
   -DFOLLY_HAVE_MEMRCHR=1
-  -DFOLLY_USE_LIBCPP=1
   -DFOLLY_MOBILE=1
 
   ## SQLCipher
@@ -155,6 +159,14 @@ add_definitions(
 )
 
 find_library(log-lib log)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  # Clang and GCC differ on how they expose the std namespace
+  # Only define this, if using clang
+  add_definitions(
+    -DFOLLY_USE_LIBCPP=1
+  )
+endif()
 
 add_library(
     # OpenSSL Crypto lib
@@ -190,6 +202,16 @@ target_link_libraries(
   openssl-ssl
   grpc++
   libprotobuf
+
+  # Comm
+  comm-modules-native
+  comm-databasemanagers
+  comm-tools
+  comm-grpc
+  comm-backup
+  comm-blob
+  comm-tunnelbroker
+  comm-sqlite-orm
 )
 
 # add a dummy library which is required by CallInvokerHolderImpl.java

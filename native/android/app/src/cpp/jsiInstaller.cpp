@@ -1,11 +1,12 @@
-#include "CommCoreModule.h"
-#include "GlobalNetworkSingletonJNIHelper.h"
-#include "SQLiteQueryExecutor.h"
-#include "ThreadOperationsJNIHelper.h"
 #include "jniHelpers.h"
 #include <CallInvokerHolder.h>
 #include <fbjni/fbjni.h>
 #include <jsi/jsi.h>
+
+#include <DatabaseManagers/SQLiteQueryExecutor.h>
+#include <Internal/GlobalNetworkSingletonJNIHelper.h>
+#include <Internal/ThreadOperationsJNIHelper.h>
+#include <Native/CommCoreModule.h>
 
 namespace jni = facebook::jni;
 namespace jsi = facebook::jsi;

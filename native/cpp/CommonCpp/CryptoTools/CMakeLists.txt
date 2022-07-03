@@ -17,6 +17,7 @@ set(CRYPTO_SRCS
   )
 
 add_library(comm-cryptotools
+  STATIC
   ${CRYPTO_HDRS}
   ${CRYPTO_SRCS}
 )
@@ -24,7 +25,7 @@ add_library(comm-cryptotools
 find_package(Olm)
 
 target_link_libraries(comm-cryptotools
-  Olm
+  Olm::Olm
   )
 
 # reference local directory when building, use installation path when installing

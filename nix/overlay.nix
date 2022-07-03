@@ -13,7 +13,17 @@ prev:
   # add packages meant for just this repository
   amqp-cpp = prev.callPackage ./amqp-cpp.nix { };
 
+  androidDevEnv = prev.callPackage ./android-dev-env.nix { };
+
   protobuf_3_15_cmake = prev.callPackage ./protobuf_3_15.nix { };
+
+  # The original c-ares just uses a Makefile build
+  # so it doesn't export any cmake information.
+  # This is likely to be not be changed upstreamed because
+  # it's used to bootstrap curl, which is required to make cmake.
+  c-ares-cmake = (prev.c-ares.overrideAttrs(_: {
+    nativeBuildInputs = [ prev.cmake ];
+  }));
 
   comm-grpc = final.callPackage ./comm-grpc.nix { };
 
@@ -40,4 +50,11 @@ prev:
   });
 
   fbjni = prev.callPackage ./fbjni.nix { };
+
+  # Android ecosystem expects to be to available at `$out/lib`
+  openjdk8 = prev.openjdk8.overrideAttrs(_: {
+    preFixup = ''
+      ln -s $out/lib/openjdk/lib/* $out/lib
+    '';
+  });
 }

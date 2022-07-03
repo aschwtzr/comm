@@ -2,8 +2,8 @@ project(grpc-comm)
 cmake_minimum_required(VERSION 3.4)
 
 include(GNUInstallDirs)
-find_package(protobuf REQUIRED)
-find_package(gRPC REQUIRED)
+find_package(protobuf)
+find_package(gRPC)
 
 set(_components backup blob tunnelbroker)
 # Iterate through each protobuf file, create headers, sources, and export as component library
@@ -57,6 +57,7 @@ set(CLIENT_SRCS
 )
 
 add_library(comm-client
+  STATIC
   ${CLIENT_HDRS}
   ${CLIENT_SRCS}
 )

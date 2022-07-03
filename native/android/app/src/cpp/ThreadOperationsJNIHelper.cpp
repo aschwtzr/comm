@@ -1,6 +1,6 @@
-#include "ThreadOperationsJNIHelper.h"
-#include "SQLiteQueryExecutor.h"
-#include "ThreadOperations.h"
+#include <DatabaseManagers/SQLiteQueryExecutor.h>
+#include <Internal/ThreadOperationsJNIHelper.h>
+#include <Native/ThreadOperations.h>
 
 namespace comm {
 void ThreadOperationsJNIHelper::updateSQLiteUnreadStatus(

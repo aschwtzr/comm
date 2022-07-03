@@ -16,6 +16,7 @@ set(INTERNAL_SRCS
 )
 
 add_library(comm-modules-internal
+  STATIC
   ${INTERNAL_HDRS}
   ${INTERNAL_SRCS}
 )
@@ -35,6 +36,7 @@ set(NATIVE_SRCS
 )
 
 add_library(comm-modules-native
+  STATIC
   ${NATIVE_HDRS}
   ${NATIVE_SRCS}
 )

@@ -1,9 +1,11 @@
 { mkShell
 , stdenv
 , lib
+, androidDevEnv
 , amqp-cpp
 , arcanist
 , boost
+, c-ares-cmake
 , cargo
 , cmake
 , cryptopp
@@ -11,11 +13,13 @@
 , fbjni
 , folly
 , fmt
+, glog
 , grpc
 , libiconv
 , libuv
 , nodejs-16_x
 , olm
+, openjdk8
 , openssl
 , pkg-config
 , protobuf_3_15_cmake
@@ -25,6 +29,8 @@
 , watchman
 , rustfmt
 , yarn
+, zlib
+, pkgsCross
 }:
 
 mkShell {
@@ -60,7 +66,7 @@ mkShell {
 
   # include any libraries buildInputs
   buildInputs = [
-    fbjni # android builds
+    c-ares-cmake # android
     protobuf_3_15_cmake # exposes both a library and a command, thus should appear in both inputs
     folly # cpp tools
     fmt # needed for folly
@@ -68,6 +74,10 @@ mkShell {
     olm # needed for CryptoTools
     sqlite # needed for sqlite_orm
     openssl # needed for grpc
+  ] ++ lib.optionals stdenv.isx86_64 [
+    # aarch64-darwin tarballs are not available
+    androidDevEnv.androidsdk
+    glog # android
   ] ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
     CoreFoundation
     CoreServices
@@ -75,10 +85,19 @@ mkShell {
     libiconv  # identity service
   ]);
 
+  # Used by gradle
+  JAVA_HOME = openjdk8.passthru.home;
+
   # shell commands to be ran upon entering shell
   shellHook = ''
     if [[ "$OSTYPE" == 'linux'* ]]; then
       export MYSQL_UNIX_PORT=''${XDG_RUNTIME_DIR:-/run/user/$UID}/mysql-socket/mysql.sock
+      export ANDROID_SDK_ROOT=''${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}
+    fi
+
+    if [ -f /etc/NIXOS ]; then
+      # allow for impurely downloaded android ndk tools to be used on NixOS
+      export LD_LIBRARY_PATH=${lib.makeLibraryPath [ stdenv.cc.cc.lib zlib ]}
     fi
 
     echo "Welcome to Comm dev environment! :)"
