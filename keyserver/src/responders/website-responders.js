@@ -197,6 +197,7 @@ async function websiteResponder(
     const requestedActiveChatThreadID = finalNavInfo.activeChatThreadID;
     if (
       requestedActiveChatThreadID &&
+      threadInfos[requestedActiveChatThreadID] &&
       !threadHasPermission(
         threadInfos[requestedActiveChatThreadID],
         threadPermissions.VISIBLE,
