@@ -21,8 +21,8 @@ class GetReactor
     : public ServerWriteReactorBase<blob::GetRequest, blob::GetResponse> {
   size_t offset = 0;
   size_t fileSize = 0;
-  const size_t chunkSize =
-      GRPC_CHUNK_SIZE_LIMIT - GRPC_METADATA_SIZE_PER_MESSAGE;
+  size_t extraBytesNeeded = 0;
+  size_t chunkSize = 0;
   database::S3Path s3Path;
   Aws::S3::Model::GetObjectRequest getRequest;
 
@@ -63,6 +63,14 @@ public:
   }
 
   void initialize() override {
+    this->extraBytesNeeded = this->request.extrabytesneeded();
+    this->chunkSize = GRPC_CHUNK_SIZE_LIMIT - GRPC_METADATA_SIZE_PER_MESSAGE;
+    if (this->extraBytesNeeded >= this->chunkSize) {
+      throw std::runtime_error(
+          "extra bytes needed (" + std::to_string(this->extraBytesNeeded) +
+          ") cannot exceed the grpc chunk limit (" + std::to_string(this->chunkSize) + ")");
+    }
+    this->chunkSize -= this->extraBytesNeeded;
     this->s3Path = tools::findS3Path(this->request.holder());
     this->fileSize =
         getBucket(s3Path.getBucketName()).getObjectSize(s3Path.getObjectName());
