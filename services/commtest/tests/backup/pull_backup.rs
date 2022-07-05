@@ -54,6 +54,11 @@ pub async fn run(
       Some(LogId(id)) => log_id = Some(id),
       None => {}
     };
+    let attachment_holders = response.attachment_holders.unwrap_or("".to_string());
+    let mut holders_split: Vec<&str> = Vec::new();
+    if !attachment_holders.is_empty() {
+      holders_split = attachment_holders.split(ATTACHMENT_DELIMITER).collect();
+    }
     match response_data {
       Some(CompactionChunk(chunk)) => {
         assert_eq!(
@@ -63,12 +68,24 @@ pub async fn run(
           state
         );
         current_id = backup_id.expect("backup id expected but not received");
+        result.backup_item.chunks_sizes.push(chunk.len());
         println!(
-          "compaction (id {}), pushing chunk (size: {})",
+          "compaction (id {}), pushing chunk (size: {}), attachments: {}",
           current_id,
-          chunk.len()
+          chunk.len(),
+          holders_split.len()
         );
-        result.backup_item.chunks_sizes.push(chunk.len())
+        if !holders_split.is_empty() {
+          for holder in holders_split {
+            if holder.is_empty() {
+              continue;
+            }
+            result
+              .backup_item
+              .attachments_holders
+              .push(holder.to_string());
+          }
+        }
       }
       Some(LogChunk(chunk)) => {
         if state == State::Compaction {
@@ -88,33 +105,16 @@ pub async fn run(
         result.log_items[log_items_size]
           .chunks_sizes
           .push(chunk.len());
-
-        println!("log (id {}) chunk size {}", current_id, chunk.len());
-      }
-      Some(AttachmentHolders(holders)) => {
-        let holders_split: Vec<&str> =
-          holders.split(ATTACHMENT_DELIMITER).collect();
-        if state == State::Compaction {
-          println!("attachments for the backup: {}", holders);
+        println!("log (id {}) chunk size {}, attachments: {}", current_id, chunk.len(), holders_split.len());
+        if !holders_split.is_empty() {
+          let log_items_size = result.log_items.len() - 1;
           for holder in holders_split {
-            if holder.len() == 0 {
+            if holder.is_empty() {
               continue;
             }
-            result
-              .backup_item
-              .attachments_holders
-              .push(holder.to_string());
-          }
-        } else if state == State::Log {
-          println!("attachments for the log: {}", holders);
-          for holder in holders_split {
-            if holder.len() == 0 {
-              continue;
-            }
-            let log_items_size = result.log_items.len() - 1;
             result.log_items[log_items_size]
               .attachments_holders
-              .push(holder.to_string())
+              .push(holder.to_string());
           }
         }
       }
