@@ -19,12 +19,14 @@ namespace reactor {
 class BlobGetClientReactor
     : public ClientReadReactorBase<blob::GetRequest, blob::GetResponse> {
   std::string holder;
+  const size_t extraBytesNeeded;
   std::shared_ptr<folly::MPMCQueue<std::string>> dataChunks;
   std::condition_variable *terminationNotifier;
 
 public:
   BlobGetClientReactor(
       const std::string &holder,
+      const size_t extraBytesNeeded,
       std::shared_ptr<folly::MPMCQueue<std::string>> dataChunks,
       std::condition_variable *terminationNotifier);
 
