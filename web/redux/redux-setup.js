@@ -128,6 +128,8 @@ export function reducer(oldState: AppState | void, action: Action): AppState {
       state.navInfo,
       action,
       state.threadStore.threadInfos,
+      state.currentUserInfo?.id,
+      state.userStore.userInfos,
     ),
   };
 
