@@ -18,6 +18,7 @@ pub async fn run(
   let response = client
     .get(Request::new(GetRequest {
       holder: cloned_holder,
+      extra_bytes_needed: 0,
     }))
     .await?;
   let mut inbound = response.into_inner();

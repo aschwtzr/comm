@@ -28,6 +28,7 @@ message PutResponse {
 
 message GetRequest {
   string holder = 1;
+  uint32 extraBytesNeeded = 2;
 }
 
 message GetResponse {
