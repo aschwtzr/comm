@@ -167,9 +167,7 @@ void PullBackupReactor::terminateCallback() {
     this->blobGetDoneCV.wait(lockGet);
   }
   if (this->getReactor->getStatusHolder()->state != ReactorState::DONE) {
-    throw std::runtime_error(
-        "Invalid reactor state, waited for the get reactor to finish and it "
-        "still isn't finished");
+    throw std::runtime_error("get reactor has not been terminated properly");
   }
   if (!this->getReactor->getStatusHolder()->getStatus().ok()) {
     throw std::runtime_error(
