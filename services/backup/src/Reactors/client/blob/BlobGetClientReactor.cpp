@@ -7,11 +7,15 @@ namespace reactor {
 
 BlobGetClientReactor::BlobGetClientReactor(
     const std::string &holder,
+    const size_t extraBytesNeeded,
     std::shared_ptr<folly::MPMCQueue<std::string>> dataChunks,
     std::condition_variable *terminationNotifier)
     : holder(holder),
+      extraBytesNeeded(extraBytesNeeded),
       dataChunks(dataChunks),
       terminationNotifier(terminationNotifier) {
+  this->request.set_holder(holder);
+  this->request.set_extrabytesneeded(extraBytesNeeded);
 }
 
 std::unique_ptr<grpc::Status>

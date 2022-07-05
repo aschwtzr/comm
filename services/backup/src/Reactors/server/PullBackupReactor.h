@@ -25,9 +25,7 @@ class PullBackupReactor : public ServerWriteReactorBase<
 
   enum class State {
     COMPACTION = 1,
-    COMPACTION_ATTACHMENTS = 2,
     LOGS = 3,
-    LOG_ATTACHMENTS = 4,
   };
 
   std::shared_ptr<database::BackupItem> backupItem;
@@ -43,7 +41,7 @@ class PullBackupReactor : public ServerWriteReactorBase<
   std::condition_variable blobGetDoneCV;
   std::mutex blobGetDoneCVMutex;
 
-  void initializeGetReactor(const std::string &holder);
+  void initializeGetReactor(const std::string &holder, const size_t extraBytesNeeded);
   void nextLog();
 
 public:
