@@ -1,4 +1,5 @@
 #import "NotificationService.h"
+#import "TemporalMessageStorage.h"
 
 @interface NotificationService ()
 
@@ -16,7 +17,11 @@
                            contentHandler {
   self.contentHandler = contentHandler;
   self.bestAttemptContent = [request.content mutableCopy];
-
+  NSString *message = self.bestAttemptContent.userInfo[@"messageInfos"];
+  TemporalMessageStorage *temporalStorage =
+      [[TemporalMessageStorage alloc] init];
+  [temporalStorage writeMessage:message];
+  [temporalStorage ensureLockUsable];
   // TODO modify self.bestAttemptContent here
 
   self.contentHandler(self.bestAttemptContent);
