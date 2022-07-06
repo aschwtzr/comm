@@ -154,7 +154,7 @@ class App extends React.PureComponent<Props> {
     const { tab, settingsSection } = this.props.navInfo;
     if (tab === 'calendar') {
       mainContent = <Calendar url={this.props.location.pathname} />;
-    } else if (tab === 'chat') {
+    } else if (tab === 'chat' || tab === 'chat-creation') {
       mainContent = <Chat />;
     } else if (tab === 'apps') {
       mainContent = <AppsDirectory />;
