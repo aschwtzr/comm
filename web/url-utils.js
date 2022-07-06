@@ -21,8 +21,8 @@ function canonicalURLFromReduxState(
   let newURL = `/`;
 
   if (loggedIn) {
-    newURL += `${navInfo.tab}/`;
     if (navInfo.tab === 'calendar') {
+      newURL += `${navInfo.tab}/`;
       const { startDate, endDate } = navInfo;
       const year = yearExtractor(startDate, endDate);
       if (urlInfo.year !== undefined) {
@@ -54,12 +54,23 @@ function canonicalURLFromReduxState(
         newURL += `month/${month}/`;
       }
     } else if (navInfo.tab === 'chat') {
+      newURL += `${navInfo.tab}/`;
       const activeChatThreadID = navInfo.activeChatThreadID;
       if (activeChatThreadID) {
         newURL += `thread/${activeChatThreadID}/`;
       }
+    } else if (navInfo.tab === 'chat-creation') {
+      newURL += `chat/`;
+      const users = navInfo.selectedUserList?.join(',') ?? '';
+      newURL += `thread/new/${users}`;
+      if (users.length) {
+        newURL += `/`;
+      }
     } else if (navInfo.tab === 'settings' && navInfo.settingsSection) {
+      newURL += `${navInfo.tab}/`;
       newURL += `${navInfo.settingsSection}/`;
+    } else {
+      newURL += `${navInfo.tab}/`;
     }
   }
 
@@ -106,14 +117,23 @@ function navInfoFromURL(
     tab = 'apps';
   } else if (urlInfo.settings) {
     tab = 'settings';
+  } else if (urlInfo.threadCreation) {
+    tab = 'chat-creation';
   }
 
-  const newNavInfo = {
+  let newNavInfo = {
     tab,
     startDate: startDateForYearAndMonth(year, month),
     endDate: endDateForYearAndMonth(year, month),
     activeChatThreadID,
   };
+
+  if (urlInfo.selectedUserList) {
+    newNavInfo = {
+      ...newNavInfo,
+      selectedUserList: urlInfo.selectedUserList,
+    };
+  }
 
   if (!urlInfo.settings) {
     return newNavInfo;
