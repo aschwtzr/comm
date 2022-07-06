@@ -12,6 +12,7 @@ use rand::rngs::OsRng;
 use rand::{CryptoRng, Rng};
 use siwe::Message;
 use std::pin::Pin;
+use std::sync::Arc;
 use tokio::sync::mpsc;
 use tokio_stream::{wrappers::ReceiverStream, StreamExt};
 use tonic::{Request, Response, Status};
@@ -59,7 +60,7 @@ enum PakeWorkflow {
 #[derive(derive_more::Constructor)]
 pub struct MyIdentityService {
   config: Config,
-  client: DatabaseClient,
+  client: Arc<DatabaseClient>,
 }
 
 #[tonic::async_trait]
@@ -345,7 +346,7 @@ impl IdentityService for MyIdentityService {
 }
 
 async fn put_token_helper(
-  client: DatabaseClient,
+  client: Arc<DatabaseClient>,
   auth_type: AuthType,
   user_id: &str,
   device_id: &str,
@@ -427,7 +428,7 @@ fn parse_and_verify_siwe_message(
 }
 
 async fn wallet_login_helper(
-  client: DatabaseClient,
+  client: Arc<DatabaseClient>,
   wallet_login_request: WalletLoginRequestStruct,
   rng: &mut (impl Rng + CryptoRng),
   num_messages_received: u8,
@@ -460,7 +461,7 @@ async fn wallet_login_helper(
 
 async fn pake_login_start(
   config: Config,
-  client: DatabaseClient,
+  client: Arc<DatabaseClient>,
   user_id: &str,
   pake_credential_request: &[u8],
   num_messages_received: u8,
@@ -532,7 +533,7 @@ async fn pake_login_start(
 async fn pake_login_finish(
   user_id: &str,
   device_id: &str,
-  client: DatabaseClient,
+  client: Arc<DatabaseClient>,
   server_login: Option<ServerLogin<Cipher>>,
   pake_credential_finalization: &[u8],
   rng: &mut (impl Rng + CryptoRng),
@@ -617,7 +618,7 @@ async fn pake_registration_start(
 
 async fn pake_registration_finish(
   user_id: &str,
-  client: DatabaseClient,
+  client: Arc<DatabaseClient>,
   registration_upload_bytes: &[u8],
   server_registration: Option<ServerRegistration<Cipher>>,
   num_messages_received: u8,

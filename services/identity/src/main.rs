@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use clap::{Parser, Subcommand};
 use database::DatabaseClient;
 use tonic::transport::Server;
@@ -49,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
       let addr = IDENTITY_SERVICE_SOCKET_ADDR.parse()?;
       let config = Config::load()?;
       let aws_config = aws_config::from_env().region("us-east-2").load().await;
-      let database_client = DatabaseClient::new(&aws_config);
+      let database_client = Arc::new(DatabaseClient::new(&aws_config));
       let identity_service = MyIdentityService::new(config, database_client);
       Server::builder()
         .add_service(IdentityServiceServer::new(identity_service))
