@@ -14,7 +14,7 @@ import type {
   ComposableMessageInfo,
   RobotextMessageInfo,
 } from 'lib/types/message-types';
-import type { ThreadInfo } from 'lib/types/thread-types';
+import { type ThreadInfo } from 'lib/types/thread-types';
 
 import { getDefaultTextMessageRules } from '../markdown/rules.react';
 import type { AppState } from '../redux/redux-setup';
@@ -215,6 +215,10 @@ function useOnClickNewThread(): (event: SyntheticEvent<HTMLElement>) => void {
 }
 
 function navTabSelector(state: AppState): NavigationTab {
+  if (state.navInfo.tab === 'chat-creation' || state.navInfo.tab === 'chat') {
+    return 'chat';
+  }
+
   return state.navInfo.tab;
 }
 
