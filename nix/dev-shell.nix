@@ -3,14 +3,17 @@
 , lib
 , amqp-cpp
 , arcanist
+, aws-sdk-cpp
 , boost
 , cargo
 , cmake
 , cryptopp
 , darwin
+, double-conversion
 , fbjni
 , folly
 , fmt
+, glog
 , grpc
 , libiconv
 , libuv
@@ -58,7 +61,10 @@ mkShell {
 
   # include any libraries buildInputs
   buildInputs = [
+    aws-sdk-cpp # tunnelbroker
+    double-conversion # tunnelbroker
     fbjni # android builds
+    glog # tunnelbroker
     protobuf_3_15_cmake # exposes both a library and a command, thus should appear in both inputs
     folly # cpp tools
     fmt # needed for folly
@@ -78,6 +84,10 @@ mkShell {
     if [[ "$OSTYPE" == 'linux'* ]]; then
       export MYSQL_UNIX_PORT=''${XDG_RUNTIME_DIR:-/run/user/$UID}/mysql-socket/mysql.sock
     fi
+
+    # TODO: Fix aws sdk cmake installation path logic upstream
+    export AWSSDK_ROOT_DIR=${lib.getDev aws-sdk-cpp}
+    export AWSSDK_CORE_HEADER_FILE=${lib.getDev aws-sdk-cpp}/include/aws/core/Aws.h
 
     echo "Welcome to Comm dev environment! :)"
   '';
