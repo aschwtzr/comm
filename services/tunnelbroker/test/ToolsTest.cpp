@@ -34,6 +34,25 @@ TEST(ToolsTest, ValidateDeviceIDReturnsTrueOnGeneratedValidDeviceID) {
       << "\" is invalid by the function";
 }
 
+TEST(ToolsTest, ValidateUUIDReturnsTrueOnStaticValidUUID) {
+  const std::string validUUID = "9bfdd6ea-25de-418f-aa2e-869c78073d81";
+  EXPECT_EQ(tools::validateUUID(validUUID), true)
+      << "Valid UUID \"" << validUUID << "\" is invalid by the function";
+}
+
+TEST(ToolsTest, ValidateUUIDReturnsFalseOnStaticInvalidUUID) {
+  const std::string invalidUUID = "bfdd6ea-25de-418f-aa2e-869c78073d81";
+  EXPECT_EQ(tools::validateUUID(invalidUUID), false)
+      << "Invalid UUID \"" << invalidUUID << "\" is valid by the function";
+}
+
+TEST(ToolsTest, ValidateUUIDReturnsTrueOnGeneratedValidUUID) {
+  const std::string validUUID = tools::generateUUID();
+  EXPECT_EQ(tools::validateUUID(validUUID), true)
+      << "Valid generated UUID \"" << validUUID
+      << "\" is invalid by the function";
+}
+
 TEST(ToolsTest, ValidateDeviceIDReturnsFalseOnInvalidDeviceIDPrefix) {
   const std::string invalidDeviceIDPrefix =
       "invalid-"
