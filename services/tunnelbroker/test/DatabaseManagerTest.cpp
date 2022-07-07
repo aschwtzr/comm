@@ -298,3 +298,42 @@ TEST_F(DatabaseManagerTest, PutAndFoundByReceiverMessageItemsDataIsSame) {
   database::DatabaseManager::getInstance().removeMessageItem(
       item.getMessageID());
 }
+
+TEST_F(DatabaseManagerTest, RemoveMessageItemsInBatch) {
+  const std::string receiverID =
+      "mobile:EMQNoQ7b2ueEmQ4QsevRWlXxFCNt055y20T1PHdoYAQRt0S6TLzZWNM6XSvdWqxm";
+  const database::MessageItem messageFirst(
+      tools::generateUUID(),
+      "mobile:" + tools::generateRandomString(DEVICEID_CHAR_LENGTH),
+      receiverID,
+      tools::generateRandomString(256),
+      tools::generateRandomString(256));
+  const database::MessageItem messageSecond(
+      tools::generateUUID(),
+      "web:" + tools::generateRandomString(DEVICEID_CHAR_LENGTH),
+      receiverID,
+      tools::generateRandomString(256),
+      tools::generateRandomString(256));
+
+  EXPECT_EQ(
+      database::DatabaseManager::getInstance().isTableAvailable(
+          item.getTableName()),
+      true);
+  database::DatabaseManager::getInstance().putMessageItem(messageFirst);
+  database::DatabaseManager::getInstance().putMessageItem(messageSecond);
+  std::vector<std::shared_ptr<database::MessageItem>> foundItems =
+      database::DatabaseManager::getInstance().findMessageItemsByReceiver(
+          receiverID);
+  EXPECT_EQ(foundItems.size(), 2)
+      << "Items count found by receiverID after insert is not equal to 2";
+  std::vector<std::string> messageIDs = {
+      messageFirst.getMessageID(), messageSecond.getMessageID()};
+  database::DatabaseManager::getInstance().removeMessageItemsByIDsForDeviceID(
+      messageIDs, receiverID);
+  foundItems =
+      database::DatabaseManager::getInstance().findMessageItemsByReceiver(
+          receiverID);
+  EXPECT_EQ(foundItems.size(), 0)
+      << "Items found by receiverID is not equal to 0 after calling "
+         "`removeMessageItemsByIDsForDeviceID`";
+}
