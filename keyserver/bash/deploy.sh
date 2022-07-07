@@ -10,13 +10,13 @@
 MAX_DISK_USAGE_KB=3145728 # 3 GiB
 
 # The user that spawns the Node server
-DAEMON_USER=comm
+DAEMON_USER="comm"
 
 # Input to git clone
 GIT_CLONE_PARAMS=https://github.com/CommE2E/comm.git
 
 set -e
-[[ `whoami` = root ]] || exec sudo su -c "$0 $1"
+[[ $(whoami) = root ]] || exec sudo su -c "$0 $1"
 
 # STEP 1: clone source into new directory
 CHECKOUT_PATH=$1.$(date +%F-%H-%M)
@@ -48,7 +48,7 @@ for checkout in "${checkouts[@]}"; do
   if [[ "$checkout" = "$CHECKOUT_PATH" ]]; then
     break
   fi
-  TOTAL_USAGE=$(sudo du -cs $1* | grep total | awk '{ print $1 }')
+  TOTAL_USAGE=$(sudo du -cs "$1"* | awk '/total/ { print $1 }')
   if [[ $TOTAL_USAGE -le $MAX_DISK_USAGE_KB ]]; then
     break
   fi
