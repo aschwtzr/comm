@@ -15,6 +15,7 @@
 , libuv
 , nodejs-16_x
 , olm
+, openjdk8
 , openssl
 , pkg-config
 , protobuf_3_15_cmake
@@ -23,6 +24,7 @@
 , watchman
 , rustfmt
 , yarn
+, zlib
 }:
 
 mkShell {
@@ -71,10 +73,18 @@ mkShell {
     libiconv  # identity service
   ]);
 
+  JAVA_HOME = openjdk8.passthru.home;
+
   # shell commands to be ran upon entering shell
   shellHook = ''
     if [[ "$OSTYPE" == 'linux'* ]]; then
       export MYSQL_UNIX_PORT=''${XDG_RUNTIME_DIR:-/run/user/$UID}/mysql-socket/mysql.sock
+      export ANDROID_SDK_ROOT=''${ANDROID_SDK_ROOT:-$HOME/Android/Sdk}
+    fi
+
+    if [ -f /etc/NIXOS ]; then
+      # allow for impurely downloaded android ndk tools to be used on NixOS
+      export LD_LIBRARY_PATH=${lib.makeLibraryPath [ stdenv.cc.cc.lib zlib ]}
     fi
 
     echo "Welcome to Comm dev environment! :)"
