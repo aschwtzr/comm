@@ -1,4 +1,4 @@
-PROJECT(tunnelbroker C CXX)
+PROJECT(tunnelbroker-service C CXX)
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -25,6 +25,16 @@ pkg_check_modules(CRYPTOPP REQUIRED libcryptopp=8.6)
 # Find Libuv installation
 pkg_check_modules(LIBUV REQUIRED libuv>=1.43)
 
+# Shared Comm libraries under native/cpp
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../native/cpp/
+  ${CMAKE_CURRENT_BINARY_DIR}/cpp
+  EXCLUDE_FROM_ALL
+)
+
+# Ideally, we should be able to re-use this project, but transitive
+# linking with aws-sdk seems to be problematic
+# add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../lib/src ${CMAKE_CURRENT_BINARY_DIR}/services-common)
+
 set(BUILD_TESTING OFF CACHE BOOL "Turn off tests" FORCE)
 set(WITH_GFLAGS OFF CACHE BOOL "Turn off gflags" FORCE)
 
@@ -35,40 +45,23 @@ find_package(Corrosion REQUIRED)
 
 find_package(glog)
 
-# Generated sources
-get_filename_component(proto "protos/tunnelbroker.proto" ABSOLUTE)
-get_filename_component(proto_path "${proto}" PATH)
+file(GLOB_RECURSE SOURCE_CODE "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB COMMON_CODE "${CMAKE_CURRENT_SOURCE_DIR}/../lib/src/*.cpp")
 
-set(GENERATED_BASE_DIR "${CMAKE_CURRENT_BINARY_DIR}/gen")
-set(GENERATED_CODE_DIR "${GENERATED_BASE_DIR}/_generated")
-file(MAKE_DIRECTORY ${GENERATED_CODE_DIR})
+set(INCLUDE_DIRS
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Database
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/DeliveryBroker
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Service
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Tools
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/Amqp
 
-set(proto_srcs "${GENERATED_CODE_DIR}/tunnelbroker.pb.cc")
-set(proto_hdrs "${GENERATED_CODE_DIR}/tunnelbroker.pb.h")
-set(grpc_srcs "${GENERATED_CODE_DIR}/tunnelbroker.grpc.pb.cc")
-set(grpc_hdrs "${GENERATED_CODE_DIR}/tunnelbroker.grpc.pb.h")
-add_custom_command(
-  OUTPUT "${proto_srcs}" "${proto_hdrs}" "${grpc_srcs}" "${grpc_hdrs}"
-  COMMAND ${_PROTOBUF_PROTOC}
-  ARGS --grpc_out "${GENERATED_CODE_DIR}"
-  --cpp_out "${GENERATED_CODE_DIR}"
-  -I "${proto_path}"
-  --plugin=protoc-gen-grpc="${_GRPC_CPP_PLUGIN_EXECUTABLE}"
-  "${proto}"
-  DEPENDS "${proto}"
-)
 
-file(GLOB_RECURSE SOURCE_CODE "./src/*.cpp")
-set(GENERATED_CODE ${proto_srcs} ${proto_hdrs} ${grpc_srcs} ${grpc_hdrs})
+  # Ideally, we would add comm-services-common as a
+  # target link library, however, aws-sdk seems to not be able
+  # to be linked transitively
+  ${CMAKE_CURRENT_SOURCE_DIR}/../lib/src
 
-include_directories(
-  ./src
-  ./src/Database
-  ./src/DeliveryBroker
-  ./src/Service
-  ./src/Tools
-  ./src/Amqp
-  ${GENERATED_BASE_DIR}
   ${Boost_INCLUDE_DIR}
   ${CRYPTOPP_INCLUDE_DIRS}
   ${LIBUV_INCLUDE_DIRS}
@@ -80,6 +73,7 @@ set(
   ${DOUBLE_CONVERSION_SOURCES}
   ${GENERATED_CODE}
   ${SOURCE_CODE}
+  ${COMMON_CODE}
 )
 
 set(
@@ -96,11 +90,14 @@ set(
   glog::glog
   double-conversion::double-conversion
   Folly::folly
+
+  comm-tunnelbroker-grpc
+  #comm-services-common
 )
 
 #SERVER
 add_executable(
-  tunnelbroker
+  tunnelbroker-service
 
   ${FOLLY_SOURCES}
   ${GENERATED_CODE}
@@ -108,13 +105,19 @@ add_executable(
 )
 
 target_link_libraries(
-  tunnelbroker
+  tunnelbroker-service
 
   ${LIBS}
 )
 
+target_include_directories(
+  tunnelbroker-service
+  PUBLIC
+  ${INCLUDE_DIRS}
+)
+
 install(
-  TARGETS tunnelbroker
+  TARGETS tunnelbroker-service
   RUNTIME DESTINATION bin/
 )
 
@@ -140,6 +143,12 @@ if ($ENV{COMM_TEST_SERVICES} MATCHES 1)
     ${LIBS}
     gtest
     gtest_main
+  )
+
+  target_include_directories(
+    runTests
+    PUBLIC
+    ${INCLUDE_DIRS}
   )
 
   add_test(
