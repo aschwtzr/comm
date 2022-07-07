@@ -215,6 +215,10 @@ function useOnClickNewThread(): (event: SyntheticEvent<HTMLElement>) => void {
 }
 
 function navTabSelector(state: AppState): NavigationTab {
+  if (state.navInfo.tab === 'chat-creation' || state.navInfo.tab === 'chat') {
+    return 'chat';
+  }
+
   return state.navInfo.tab;
 }
 
