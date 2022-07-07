@@ -25,5 +25,8 @@ services/identity/target
 .vscode
 !.vscode/extensions.json
 
+# CMake
+**/build
+
 # Nix
 result*
