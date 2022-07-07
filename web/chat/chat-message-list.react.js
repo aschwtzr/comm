@@ -40,6 +40,7 @@ import { useSelector } from '../redux/redux-utils';
 import ChatInputBar from './chat-input-bar.react';
 import css from './chat-message-list.css';
 import { MessageListContext } from './message-list-types';
+import MessageTimestampTooltip from './message-timestamp-tooltip.react';
 import Message from './message.react';
 import type {
   OnMessagePositionWithContainerInfo,
@@ -261,6 +262,17 @@ class ChatMessageList extends React.PureComponent<Props, State> {
       [css.activeContainer]: isActive,
     });
 
+    let tooltip;
+    if (this.state.mouseOverMessagePosition) {
+      const messagePositionInfo = this.state.mouseOverMessagePosition;
+      tooltip = (
+        <MessageTimestampTooltip
+          messagePositionInfo={messagePositionInfo}
+          timeZone={this.props.timeZone}
+        />
+      );
+    }
+
     let relationshipPrompt;
     if (this.props.threadInfo) {
       relationshipPrompt = (
@@ -280,6 +292,7 @@ class ChatMessageList extends React.PureComponent<Props, State> {
           <div className={messageContainerStyle} ref={this.messageContainerRef}>
             {messages}
           </div>
+          {tooltip}
         </div>
         <ChatInputBar threadInfo={threadInfo} inputState={inputState} />
       </div>,
