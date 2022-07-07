@@ -83,6 +83,70 @@
   }
 }
 
+- (NSArray<NSString *> *)readAndClearMessages {
+  NSMutableArray<NSString *> *allMessages = [NSMutableArray array];
+  NSArray<NSString *> *storageContents =
+      [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.directoryPath
+                                                        error:nil];
+  if (!storageContents) {
+    comm::Logger::log("Temporary storage directory not existing");
+    return allMessages;
+  }
+
+  NSString *previousFileName =
+      [storageContents sortedArrayUsingSelector:@selector(compare:)].lastObject;
+  NSString *previousStoragePath = [self _getPath:previousFileName];
+
+  BOOL storageUpdated = [self _updateCurrentStorage];
+
+  for (NSString *fileName in storageContents) {
+    NSString *path = [self _getPath:fileName];
+    NSError *fileReadErr = nil;
+    NSArray<NSString *> *fileMessages =
+        [EncryptedFileUtils readFromFileAtPath:path error:&fileReadErr];
+
+    if (!fileMessages) {
+      comm::Logger::log(
+          "Failed to read file at path: " + std::string([path UTF8String]) +
+          "Details: " +
+          std::string([fileReadErr.localizedDescription UTF8String]));
+    } else {
+      [allMessages addObjectsFromArray:fileMessages];
+    }
+
+    if (![path isEqualToString:previousStoragePath]) {
+      [NSFileManager.defaultManager removeItemAtPath:path error:nil];
+      continue;
+    }
+
+    NSError *lockErr = nil;
+    NSString *lockName = [self _getLockName:previousFileName];
+    NonBlockingLock *lock = [[NonBlockingLock alloc] initWithName:lockName];
+
+    @try {
+      NSError *fileClearErr = nil;
+      if (storageUpdated && [lock tryAcquireLock:&lockErr]) {
+        [NSFileManager.defaultManager removeItemAtPath:path error:nil];
+      }
+      if (lockErr) {
+        comm::Logger::log(
+            "Failed to acquire lock. Details: " +
+            std::string([lockErr.localizedDescription UTF8String]));
+      }
+      if (fileClearErr) {
+        comm::Logger::log(
+            "Failed to clear file at path: " + std::string([path UTF8String]) +
+            "Details: " +
+            std::string([fileReadErr.localizedDescription UTF8String]));
+      }
+    } @finally {
+      [lock releaseLock:&lockErr];
+      [lock destroyLock:&lockErr];
+    }
+  }
+  return allMessages;
+}
+
 - (BOOL)_updateCurrentStorage {
   int64_t updateTimestamp = (int64_t)[NSDate date].timeIntervalSince1970;
   NSString *updatedStorageName =
