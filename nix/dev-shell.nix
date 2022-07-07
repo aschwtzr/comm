@@ -3,15 +3,18 @@
 , lib
 , amqp-cpp
 , arcanist
+, aws-sdk-cpp
 , boost
 , cargo
 , cmake
 , cocoapods
 , cryptopp
 , darwin
+, double-conversion
 , fbjni
 , folly
 , fmt
+, glog
 , grpc
 , libiconv
 , libuv
@@ -60,7 +63,10 @@ mkShell {
 
   # include any libraries buildInputs
   buildInputs = [
+    aws-sdk-cpp # tunnelbroker
+    double-conversion # tunnelbroker
     fbjni # android builds
+    glog # tunnelbroker
     protobuf_3_15_cmake # exposes both a library and a command, thus should appear in both inputs
     folly # cpp tools
     fmt # needed for folly
@@ -85,6 +91,10 @@ mkShell {
       # Many commands for cocoapods expect the native BSD versions of commands
       export PATH=/usr/bin:$PATH
     fi
+
+    # TODO: Fix aws sdk cmake installation path logic upstream
+    export AWSSDK_ROOT_DIR=${lib.getDev aws-sdk-cpp}
+    export AWSSDK_CORE_HEADER_FILE=${lib.getDev aws-sdk-cpp}/include/aws/core/Aws.h
 
     echo "Welcome to Comm dev environment! :)"
   '';
