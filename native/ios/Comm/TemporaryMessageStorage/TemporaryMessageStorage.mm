@@ -46,6 +46,50 @@
   return self;
 }
 
+- (void)writeMessage:(NSString *)message {
+  NSArray<NSString *> *storageContent =
+      [NSFileManager.defaultManager contentsOfDirectoryAtPath:self.directoryPath
+                                                        error:nil];
+  if (!storageContent || !storageContent.count) {
+    comm::Logger::log("Storage not existing yet. Skipping notification");
+    return;
+  }
+
+  NSString *currentFileName =
+      [storageContent sortedArrayUsingSelector:@selector(compare:)].lastObject;
+  NSString *currentFilePath = [self _getPath:currentFileName];
+  NSString *lockName = [self _getLockName:currentFileName];
+  NonBlockingLock *lock = [[NonBlockingLock alloc] initWithName:lockName];
+
+  NSError *lockError = nil;
+  NSError *writeError = nil;
+
+  @try {
+    if (![lock tryAcquireLock:&lockError]) {
+      NSString *randomPath =
+          [self.directoryURL
+              URLByAppendingPathComponent:[NSUUID UUID].UUIDString]
+              .path;
+      [EncryptedFileUtils writeData:message toFileAtPath:randomPath error:nil];
+      comm::Logger::log(
+          "Failed to acquire lock. Details: " +
+          std::string([lockError.localizedDescription UTF8String]));
+      return;
+    }
+    [EncryptedFileUtils appendData:message
+                      toFileAtPath:currentFilePath
+                             error:&writeError];
+  } @finally {
+    [lock releaseLock:&lockError];
+  }
+
+  if (writeError) {
+    comm::Logger::log(
+        "Failed to append message to storage. Details: " +
+        std::string([writeError.localizedDescription UTF8String]));
+  }
+}
+
 - (BOOL)_updateCurrentStorage {
   int64_t updateTimestamp = (int64_t)[NSDate date].timeIntervalSince1970;
   NSString *updatedStorageName =
