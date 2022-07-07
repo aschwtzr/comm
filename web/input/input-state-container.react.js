@@ -109,6 +109,9 @@ type Props = {
   ) => Promise<SendMessageResult>,
   +newThread: (request: ClientNewThreadRequest) => Promise<NewThreadResult>,
   +pushModal: (modal: React.Node) => void,
+  +sendCallbacks: $ReadOnlyArray<() => void>,
+  +registerSendCallback: (() => void) => void,
+  +unregisterSendCallback: (() => void) => void,
 };
 type State = {
   +pendingUploads: {
@@ -498,6 +501,8 @@ class InputStateContainer extends React.PureComponent<Props, State> {
           addReply: (message: string) => this.addReply(message),
           addReplyListener: this.addReplyListener,
           removeReplyListener: this.removeReplyListener,
+          registerSendCallback: this.props.registerSendCallback,
+          unregisterSendCallback: this.props.unregisterSendCallback,
         };
       },
     ),
@@ -937,6 +942,8 @@ class InputStateContainer extends React.PureComponent<Props, State> {
     messageInfo: RawTextMessageInfo,
     threadInfo: ThreadInfo,
   ) {
+    this.props.sendCallbacks.forEach(callback => callback());
+
     if (!threadIsPending(threadInfo.id)) {
       this.props.dispatchActionPromise(
         sendTextMessageActionTypes,
@@ -1248,6 +1255,18 @@ const ConnectedInputStateContainer: React.ComponentType<BaseProps> = React.memo<
     const dispatchActionPromise = useDispatchActionPromise();
     const modalContext = useModalContext();
 
+    const [sendCallbacks, setSendCallbacks] = React.useState<
+      $ReadOnlyArray<() => void>,
+    >([]);
+    const registerSendCallback = (callback: () => void) => {
+      setSendCallbacks(prevCallbacks => [...prevCallbacks, callback]);
+    };
+    const unregisterSendCallback = (callback: () => void) => {
+      setSendCallbacks(prevCallbacks =>
+        prevCallbacks.filter(candidate => candidate !== callback),
+      );
+    };
+
     return (
       <InputStateContainer
         {...props}
@@ -1265,6 +1284,9 @@ const ConnectedInputStateContainer: React.ComponentType<BaseProps> = React.memo<
         dispatch={dispatch}
         dispatchActionPromise={dispatchActionPromise}
         pushModal={modalContext.pushModal}
+        sendCallbacks={sendCallbacks}
+        registerSendCallback={registerSendCallback}
+        unregisterSendCallback={unregisterSendCallback}
       />
     );
   },
