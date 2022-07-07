@@ -12,9 +12,9 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_package(PkgConfig REQUIRED)
 
-# FIND LIBS
-include(./cmake-components/grpc.cmake)
-include(./cmake-components/folly.cmake)
+find_package(double-conversion REQUIRED)
+find_package(Folly REQUIRED)
+find_package(gRPC REQUIRED)
 
 # Find AMQP-CPP installation
 find_package(amqpcpp CONFIG REQUIRED)
@@ -33,7 +33,7 @@ find_package(Boost 1.40 COMPONENTS program_options thread system REQUIRED)
 find_package(OpenSSL REQUIRED)
 find_package(Corrosion REQUIRED)
 
-add_subdirectory(./lib/glog)
+find_package(glog)
 
 # Generated sources
 get_filename_component(proto "protos/tunnelbroker.proto" ABSOLUTE)
@@ -60,7 +60,6 @@ add_custom_command(
 
 file(GLOB_RECURSE SOURCE_CODE "./src/*.cpp")
 set(GENERATED_CODE ${proto_srcs} ${proto_hdrs} ${grpc_srcs} ${grpc_hdrs})
-file(GLOB DOUBLE_CONVERSION_SOURCES "./lib/double-conversion/double-conversion/*.cc")
 
 include_directories(
   ./src
@@ -70,8 +69,6 @@ include_directories(
   ./src/Tools
   ./src/Amqp
   ${GENERATED_BASE_DIR}
-  ${FOLLY_INCLUDES}
-  ./lib/double-conversion
   ${Boost_INCLUDE_DIR}
   ${CRYPTOPP_INCLUDE_DIRS}
   ${LIBUV_INCLUDE_DIRS}
@@ -88,9 +85,8 @@ set(
 set(
   LIBS
 
-  ${GRPC_LIBS}
-  ${_PROTOBUF_LIBPROTOBUF}
-  ${_REFLECTION}
+  gRPC::grpc++_reflection
+  gRPC::grpc++
   ${AWSSDK_LINK_LIBRARIES}
   ${CRYPTOPP_LIBRARIES}
   ${LIBUV_LIBRARIES}
@@ -98,6 +94,8 @@ set(
   amqpcpp
   OpenSSL::SSL
   glog::glog
+  double-conversion::double-conversion
+  Folly::folly
 )
 
 #SERVER
