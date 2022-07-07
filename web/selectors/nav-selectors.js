@@ -144,6 +144,7 @@ function useOnClickThread(
         dispatch({
           type: updateNavInfoActionType,
           payload: {
+            tab: 'chat',
             activeChatThreadID: threadID,
             pendingThread: thread,
           },
@@ -152,6 +153,7 @@ function useOnClickThread(
         dispatch({
           type: updateNavInfoActionType,
           payload: {
+            tab: 'chat',
             activeChatThreadID: threadID,
           },
         });
