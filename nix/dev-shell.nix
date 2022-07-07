@@ -6,6 +6,7 @@
 , boost
 , cargo
 , cmake
+, cocoapods
 , cryptopp
 , darwin
 , folly
@@ -52,7 +53,8 @@ mkShell {
     pkg-config
     protobuf_3_15_cmake
     grpc
-
+  ] ++ lib.optionals stdenv.isDarwin [
+    cocoapods # needed for ios
   ];
 
   # include any libraries buildInputs
