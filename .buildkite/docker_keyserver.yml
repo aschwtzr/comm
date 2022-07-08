@@ -1,5 +1,6 @@
 steps:
-  - command:
+  - label: ":docker: Keyserver Build (Docker)"
+    command:
       - 'cd keyserver && touch .env && bash/dc.sh build --no-cache'
     agents:
       - 'autoscaling=true'
