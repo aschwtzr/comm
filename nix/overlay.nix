@@ -17,9 +17,14 @@ prev:
 
   comm-grpc = final.callPackage ./comm-grpc.nix { };
 
+  comm-tunnelbroker = final.callPackage ./tunnelbroker.nix { };
+
   devShell = final.callPackage ./dev-shell.nix { };
 
   fbjni = prev.callPackage ./fbjni.nix { };
+
+  # use folly's version of fmt as the default
+  fmt = prev.fmt_8;
 
   mysql-down = prev.callPackage ./mysql-down-linux.nix { };
 
