@@ -9,6 +9,10 @@ div.container {
   flex-direction: column;
 }
 
+div.container > div {
+  flex: 1;
+}
+
 div.tabItem {
   display: flex;
   align-items: center;
@@ -21,4 +25,7 @@ div.tabItem svg {
 div.threadList {
   flex: 1;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
