@@ -88,14 +88,18 @@ To start a certain service in the sandbox you can run the following command:
 yarn run-[service-name]-service-in-sandbox
 ```
 
-For example, for Tunnelbroker the command will look like this: 
+For example, for Tunnelbroker the command will look like this:
 
 ```
 yarn run-tunnelbroker-service-in-sandbox
 ```
 
-You can also run all services at once in the sandbox using the command below: 
+You can also run all services at once in the sandbox using the command below:
 
 ```
 yarn run-all-services-in-sandbox
 ```
+
+### Rebuilding the base image
+
+If you ever wish to rebuild the base image, you should get a tool named [buildx](https://github.com/docker/buildx). It should be attached with the docker desktop app on the Mac OS, but if you use Linux, you will probably need to install it manually. For the installation instructions, please go [here](https://github.com/docker/buildx#installing).
