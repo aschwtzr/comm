@@ -15,6 +15,8 @@ std::string generateHolder(
 
 std::string validateAttachmentHolders(const std::string &holders);
 
+std::size_t getUtf8Length(std::string &str);
+
 } // namespace tools
 } // namespace network
 } // namespace comm
