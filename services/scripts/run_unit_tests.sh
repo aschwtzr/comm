@@ -10,6 +10,10 @@ SERVICES=$(./scripts/list_services.sh)
 run_unit_test () {
   echo "unit tests will be run for the $1 service"
 
+  if [[ $(uname -m) == 'arm64' ]]; then
+    export COMM_BASE_IMAGE_M1_SUFFIX=".m1"
+  fi
+
   docker-compose build "$1"-server
   docker-compose run "$1"-server
 }

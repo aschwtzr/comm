@@ -29,5 +29,9 @@ else
   exit 1
 fi
 
+if [[ $(uname -m) == 'arm64' ]]; then
+  export COMM_BASE_IMAGE_M1_SUFFIX=".m1"
+fi
+
 docker-compose build "$SERVICE"-server
 docker-compose up "$SERVICE"-server

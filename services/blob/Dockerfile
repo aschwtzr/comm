@@ -1,4 +1,5 @@
-FROM commapp/services-base:1.1
+ARG COMM_BASE_IMAGE_M1_SUFFIX
+FROM commapp/services-base:1.1${COMM_BASE_IMAGE_M1_SUFFIX}
 
 RUN apt-get update && \
   apt-get install -y uuid-dev && \
