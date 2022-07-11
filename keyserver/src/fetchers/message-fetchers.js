@@ -294,6 +294,7 @@ async function fetchMessageInfos(
   query.append(selectionClause);
   query.append(SQL`
         ORDER BY m.thread, m.time DESC
+        LIMIT 18446744073709551615
       ) x
     ) y
     WHERE y.number <= ${numberPerThread}
