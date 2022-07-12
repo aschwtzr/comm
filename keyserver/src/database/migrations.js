@@ -2,7 +2,9 @@
 
 import type { QueryResults } from 'mysql';
 
+import { isDev } from 'lib/utils/dev-utils';
 import { getMessageForException } from 'lib/utils/errors';
+import sleep from 'lib/utils/sleep';
 
 import { dbQuery, SQL } from './database';
 import { fetchDBVersion, updateDBVersion } from './db-version';
@@ -11,6 +13,10 @@ import { setupDB } from './setup-db';
 
 async function migrate(): Promise<boolean> {
   let dbVersion = null;
+  if (isDev) {
+    await sleep(5000);
+  }
+
   try {
     dbVersion = await setUpDBAndReturnVersion();
     console.log(`(node:${process.pid}) DB version: ${dbVersion}`);
