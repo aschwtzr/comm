@@ -381,7 +381,9 @@ const messageStoreMessagesBlocklistTransform: Transform = createTransform(
     const { messages, ...messageStoreSansMessages } = state;
     return messageStoreSansMessages;
   },
-  null,
+  state => {
+    return { ...state, messages: {} };
+  },
   { whitelist: ['messageStore'] },
 );
 
