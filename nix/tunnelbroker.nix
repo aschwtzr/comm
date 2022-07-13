@@ -1,5 +1,6 @@
 { lib
 , stdenv
+, comm-src
 , amqp-cpp
 , aws-sdk-cpp
 , boost
@@ -26,7 +27,7 @@
 stdenv.mkDerivation (finalAttrs: {
   name = "comm-tunnelbroker";
 
-  src = ../.;
+  src = comm-src;
 
   prePatch = ''
    cd services/tunnelbroker
