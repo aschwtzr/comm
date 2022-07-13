@@ -13,6 +13,16 @@ import type { Pool, SQLOrString, SQLStatementType } from './types';
 
 const SQLStatement: SQLStatementType = SQL.SQLStatement;
 
+let migrationConnection;
+async function getMigrationConnection() {
+  if (migrationConnection) {
+    return migrationConnection;
+  }
+  const dbConfig = await getDBConfig();
+  migrationConnection = await mysqlPromise.createConnection(dbConfig);
+  return migrationConnection;
+}
+
 let pool, databaseMonitor;
 async function loadPool(): Promise<Pool> {
   if (pool) {
@@ -86,6 +96,20 @@ const fakeResult: QueryResults = (new FakeSQLResult(): any);
 
 const MYSQL_DEADLOCK_ERROR_CODE = 1213;
 
+type ConnectionContext = {
+  +migrationsActive?: boolean,
+};
+let connectionContext = {
+  migrationsActive: false,
+};
+
+function setConnectionContext(newContext: ConnectionContext) {
+  connectionContext = {
+    ...connectionContext,
+    ...newContext,
+  };
+}
+
 type QueryOptions = {
   +triesLeft?: number,
   +multipleStatements?: boolean,
@@ -98,6 +122,9 @@ async function dbQuery(
   const multipleStatements = options?.multipleStatements ?? false;
 
   let connection;
+  if (connectionContext.migrationsActive) {
+    connection = await getMigrationConnection();
+  }
   if (multipleStatements) {
     connection = await getMultipleStatementsConnection();
   }
@@ -157,6 +184,7 @@ export {
   appendSQLArray,
   mergeAndConditions,
   mergeOrConditions,
+  setConnectionContext,
   dbQuery,
   rawSQL,
 };
