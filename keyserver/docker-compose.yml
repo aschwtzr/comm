@@ -20,6 +20,7 @@ services:
       - COMM_DATABASE_DATABASE
       - COMM_DATABASE_USER
       - COMM_DATABASE_PASSWORD
+      - COMM_DATABASE_TYPE=mariadb10.8
     depends_on:
       - cache
       - database
