@@ -7,6 +7,10 @@ license = "MIT"
 edition = "2021"
 
 [dependencies]
+tracing = "0.1"
+tokio = { version = "1.14", features = ["full"]}
+lazy_static = "1.4"
+a2 = "0.6"
 
 [lib]
 crate-type=["staticlib"]
