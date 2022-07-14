@@ -2,11 +2,15 @@
 name = "rust-notifications"
 description = "Library to send iOS and Android push notifications"
 homepage = "https://comm.app"
-version = "0.0.1"
+version = "0.1.0"
 license = "MIT"
 edition = "2021"
 
 [dependencies]
+log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_warn"] }
+tokio = { version = "1.14.0", features = ["full"]}
+lazy_static = "1.4.0"
+a2 = "0.6.2"
 
 [lib]
 crate-type=["staticlib"]
