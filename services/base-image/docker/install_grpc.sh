@@ -37,10 +37,21 @@ pushd cmake/build
 cmake \
 		-DCMAKE_POSITION_INDEPENDENT_CODE=TRUE \
 		../..
-make
-make install
+make install -j4
 popd # cmake/build
 popd # third_party/abseil-cpp/
+
+# Explicity install a more up-to-date version of protobuf, which
+# installs protobuf-config.cmake unlike `libprotobuf-dev` ubuntu package
+# which only exports the protobuf.pc. This is important because grpc's cmake
+# will attempt to find protobuf as well
+pushd third_party/protobuf/
+mkdir -p _build
+pushd _build
+cmake ../cmake -Dprotobuf_BUILD_SHARED_LIBS=ON -Dprotobuf_ABSL_PROVIDER=package
+make install -j4
+popd # _build
+popd # third_party/protobuf/
 
 popd # grpc
 

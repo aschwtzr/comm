@@ -9,6 +9,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 	autoconf \
 	libtool \
 	pkg-config \
+	libprotobuf-dev \
 	libboost-all-dev \
 	libfmt-dev \
 	libgtest-dev \

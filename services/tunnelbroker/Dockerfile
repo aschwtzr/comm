@@ -1,4 +1,4 @@
-FROM commapp/services-base:1.1
+FROM commapp/testing
 
 ARG MAKE_JOBS=4
 ENV MAKEFLAGS="-j${MAKE_JOBS}"
@@ -23,6 +23,18 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 COPY services/tunnelbroker/docker/install_corrosion.sh .
 RUN ./install_corrosion.sh
 
+COPY services/tunnelbroker/docker/install_double.sh .
+RUN ./install_double.sh
+
+COPY services/tunnelbroker/docker/install_glog.sh .
+RUN ./install_glog.sh
+
+COPY services/tunnelbroker/docker/install_grpc.sh .
+RUN ./install_grpc.sh
+
+COPY services/tunnelbroker/docker/install_folly.sh .
+RUN ./install_folly.sh
+
 ARG COMM_TEST_SERVICES
 ARG COMM_SERVICES_SANDBOX
 
@@ -31,7 +43,7 @@ ENV COMM_SERVICES_SANDBOX=${COMM_SERVICES_SANDBOX}
 
 WORKDIR /transferred
 
-COPY native/cpp/CommonCpp/grpc/protos/tunnelbroker.proto protos/tunnelbroker.proto
+ADD native/cpp/CommonCpp/grpc grpc
 COPY services/lib/cmake-components cmake-components
 COPY services/lib/docker/ scripts/
 COPY services/tunnelbroker/docker/* docker/

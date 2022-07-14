@@ -14,6 +14,7 @@ find_package(PkgConfig REQUIRED)
 
 find_package(double-conversion REQUIRED)
 find_package(Folly REQUIRED)
+find_package(protobuf CONFIG REQUIRED)
 find_package(gRPC REQUIRED)
 
 # Find AMQP-CPP installation
@@ -25,9 +26,17 @@ pkg_check_modules(CRYPTOPP REQUIRED libcryptopp=8.6)
 # Find Libuv installation
 pkg_check_modules(LIBUV REQUIRED libuv>=1.43)
 
-# Shared Comm libraries under native/cpp
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../native/cpp/
-  ${CMAKE_CURRENT_BINARY_DIR}/cpp
+if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL "/transferred")
+  # Inside the docker build contex
+  set(proto-path "grpc")
+else()
+  # Inside repo
+  set(proto-path "../../native/cpp/")
+endif()
+
+# Shared Comm protos
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/${proto-path}
+  ${CMAKE_CURRENT_BINARY_DIR}/protos
   EXCLUDE_FROM_ALL
 )
 
