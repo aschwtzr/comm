@@ -1,0 +1,9 @@
+steps:
+  - label: "CMake Lint (Nix)"
+    command:
+      - 'nix shell github:nixos/nixpkgs/nixpkgs-22.05#cmake-format -c cmake-lint **/CMakeLists.txt'
+    plugins:
+      - docker#v3.13.0:
+          image: 'nixos/nix:latest'
+    agents:
+      - 'autoscaling=true'
