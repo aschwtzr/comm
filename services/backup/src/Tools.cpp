@@ -3,6 +3,7 @@
 #include "GlobalConstants.h"
 #include "GlobalTools.h"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdlib>
 #include <random>
@@ -53,19 +54,9 @@ std::string validateAttachmentHolders(const std::string &holders) {
 }
 
 std::size_t getUtf8Length(std::string &str) {
-  std::size_t result = 0;
-  const char *ptr = str.data();
-  const char *end = ptr + str.size();
-
-  while (ptr < end) {
-    int next = std::mblen(ptr, end - ptr);
-    if (next == -1) {
-      throw std::runtime_error("strlen_mb(): conversionn error");
-    }
-    ptr += next;
-    ++result;
-  }
-  return result;
+  return std::count_if(str.begin(), str.end(), [](char c) {
+    return (static_cast<unsigned char>(c) & 0xC0) != 0x80;
+  });
 }
 
 } // namespace tools
