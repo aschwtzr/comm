@@ -60,7 +60,9 @@ add_custom_command(
 
 file(GLOB_RECURSE SOURCE_CODE "./src/*.cpp")
 set(GENERATED_CODE ${proto_srcs} ${proto_hdrs} ${grpc_srcs} ${grpc_hdrs})
-file(GLOB DOUBLE_CONVERSION_SOURCES "./lib/double-conversion/double-conversion/*.cc")
+file(GLOB DOUBLE_CONVERSION_SOURCES
+  "./lib/double-conversion/double-conversion/*.cc"
+)
 
 include_directories(
   ./src
