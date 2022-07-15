@@ -52,6 +52,22 @@ std::string validateAttachmentHolders(const std::string &holders) {
   return result;
 }
 
+std::size_t getUtf8Length(std::string &str) {
+  std::size_t result = 0;
+  const char *ptr = str.data();
+  const char *end = ptr + str.size();
+
+  while (ptr < end) {
+    int next = std::mblen(ptr, end - ptr);
+    if (next == -1) {
+      throw std::runtime_error("strlen_mb(): conversionn error");
+    }
+    ptr += next;
+    ++result;
+  }
+  return result;
+}
+
 } // namespace tools
 } // namespace network
 } // namespace comm
